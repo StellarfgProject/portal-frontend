@@ -1,0 +1,101 @@
+/* Custom Navbar Styles */
+.bg-teal {
+    background: linear-gradient(90deg, #004d40, #00796b); /* Stylish gradient */
+  }
+  
+  .navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: #ffffff !important;
+  }
+  
+  .navbar-brand:hover {
+    color: #e0f7fa !important;
+  }
+  
+  /* Navbar Links */
+  .nav-link {
+    color: #ffffff !important;
+    font-size: 1rem;
+    transition: all 0.3s ease-in-out;
+  }
+  
+  .nav-link:hover {
+    background-color: #00574b;
+    border-radius: 5px;
+    color: #e0f7fa !important;
+  }
+  
+  /* Dropdown Menu */
+  .dropdown-menu {
+    background-color: #ffffff;
+    color: #004d40;
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dropdown-item {
+    color: #004d40 !important;
+    font-size: 0.9rem;
+  }
+  
+  .dropdown-item:hover {
+    background-color: #e0f2f1 !important;
+    color: #004d40 !important;
+  }
+  
+  /* Button Styling */
+  .btn-outline-light {
+    color: #ffffff;
+    border-color: #ffffff;
+  }
+  
+  .btn-outline-light:hover {
+    background-color: #ffffff;
+    color: #004d40;
+    border-color: #ffffff;
+  }
+  
+  /* Logout Link */
+  .nav-link.text-danger {
+    font-weight: bold;
+  }
+  
+  .nav-link.text-danger:hover {
+    color: #ff7961 !important;
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .navbar-brand {
+      font-size: 1.2rem;
+    }
+  }
+  
+
+  .icon {
+    color: white; 
+    font-size: 20px;
+    width: 28px;
+    height: 28px;
+  }
+  
+.profile-dropdown-menu {
+  position: absolute;
+  right: 0;
+  left: auto;
+  z-index: 1050;
+}
+  
+
+.profile-li{
+  position: relative !important;
+}
+
+.profile-ul {
+  position: absolute !important;
+  right: 0 !important;
+  left: auto !important;
+  z-index: 1050 !important; 
+}

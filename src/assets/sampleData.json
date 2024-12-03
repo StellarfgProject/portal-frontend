@@ -1,0 +1,17 @@
+[
+    {
+      "guid": "1",
+      "first_name": "John",
+      "last_name": "Doe",
+      "city": "New York",
+      "state": "NY",
+      "phone_1": "123-456-7890",
+      "email": "john.doe@example.com",
+      "ts": "2023-12-01T10:00:00Z",
+      "domain": "example.com",
+      "claimed_by": "User1",
+      "claimed_at": "2023-12-01T12:00:00Z",
+      "status": "Pending"
+    }
+  ]
+  
