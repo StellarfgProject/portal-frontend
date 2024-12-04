@@ -14,7 +14,7 @@ const HomePage = () => {
             <Routes>
                 <Route path="/" element={<Home />}/>
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="/applications/view/:id" element={<ApplicationView isAdmin={true} />} />
+                <Route path="/applications/view/:id" element={<ApplicationView isAdmin={false} />} />
 
                 <Route path="applications/*" element={<Applications />} />
             </Routes>
