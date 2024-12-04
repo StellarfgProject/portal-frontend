@@ -1,29 +1,45 @@
-import React from 'react';
-import './ApplicationCard.css'; // Optional custom styles
+import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
+import "./ApplicationCard.css"; // Add your custom CSS styles
 
-const ApplicationCard = ({ application, onView }) => (
-  <div className="card shadow-sm">
-    <div className="card-body">
-      <h5 className="card-title text-primary">
-        {application.first_name} {application.last_name}
-      </h5>
-      <p className="card-text">
-        <strong>Location:</strong> {application.city}, {application.state}
-      </p>
-      <p className="card-text">
-        <strong>Email:</strong> <a href={`mailto:${application.email}`}>{application.email}</a>
-      </p>
-      <p className="card-text">
-        <strong>Domain:</strong> {application.domain}
-      </p>
-      <p className="card-text">
-        <strong>Status:</strong> <span className="badge bg-info">{application.status}</span>
-      </p>
-      <button className="btn btn-outline-primary" onClick={() => onView(application.guid)}>
-        View Details
-      </button>
-    </div>
-  </div>
-);
+const ApplicationCard = ({ application }) => {
+  const navigate = useNavigate();
+
+  const handleViewClick = () => {
+    navigate(`/applications/view/${application.guid}`); // Navigate to the view route with the application's ID
+  };
+
+  return (
+    <tr>
+      <td>
+        <button className="btn btn-success btn-sm" onClick={handleViewClick}>
+          View
+        </button>
+      </td>
+      <td>
+        <strong>{application.name}</strong>
+        <br />
+        <span className="text-muted">{application.cityState}</span>
+      </td>
+      <td>
+        {application.phone}
+        <br />
+        <a href={`mailto:${application.email}`} className="text-primary">
+          {application.email}
+        </a>
+      </td>
+      <td>
+        {application.submittedAt}
+        <br />
+        <span className="text-muted">{application.domain}</span>
+      </td>
+      <td className="text-muted">Not Updated</td>
+      <td>
+        <span className="badge bg-warning text-dark">{application.status}</span>
+        <button className="btn btn-danger btn-sm ms-2">Deny</button>
+      </td>
+    </tr>
+  );
+};
 
 export default ApplicationCard;

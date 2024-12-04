@@ -22,4 +22,11 @@ const getApplications = async (filters) => {
   return filteredData;
 };
 
-export default { getApplications };
+// Function to get application by ID
+const getApplicationById = async (id) => {
+  // Simulate finding an application by ID
+  const application = applicationsData.find(app => app.guid === id);
+  return application || {}; // Return null if no application is found
+};
+
+export default { getApplications, getApplicationById };

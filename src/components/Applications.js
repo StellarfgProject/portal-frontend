@@ -1,22 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import Filters from './Filters';
-import Pagination from './Pagination';
-import ApplicationCard from './ApplicationCard';
-import applicationService from '../services/applicationService';
-import './Applications.css'; // Custom styles
+import React, { useState, useEffect } from "react";
+import Filters from "./Filters";
+import Pagination from "./Pagination";
+import ApplicationCard from "./ApplicationCard";
+import applicationService from "../services/applicationService";
+import CSVService from "../services/csvService";
+import Application from "../models/Application";
+import "./Applications.css"; // Add your custom styles here
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
   const [filteredApplications, setFilteredApplications] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const applicationsPerPage = 10;
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchApplications = async () => {
       const data = await applicationService.getApplications();
-      setApplications(data);
-      setFilteredApplications(data);
+      const formattedData = data.map((app) => new Application(app));
+      setApplications(formattedData);
+      setFilteredApplications(formattedData);
     };
 
     fetchApplications();
@@ -24,40 +27,39 @@ const Applications = () => {
 
   const handleApplyFilters = async (filters) => {
     const data = await applicationService.getApplications(filters);
-    setFilteredApplications(data);
+    const formattedData = data.map((app) => new Application(app));
+    setFilteredApplications(formattedData);
     setCurrentPage(1);
   };
 
   const handleSearch = () => {
     const searchResults = applications.filter((app) =>
-      app.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.last_name.toLowerCase().includes(searchQuery.toLowerCase())
+      app.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredApplications(searchResults);
   };
 
   const handleExportCSV = () => {
-    const csvContent = [
-      ['Name', 'City', 'State', 'Phone', 'Email', 'Date', 'Domain', 'Status'],
-      ...filteredApplications.map((app) => [
-        `${app.first_name} ${app.last_name}`,
-        app.city,
-        app.state,
-        app.phone_1,
-        app.email,
-        app.ts,
-        app.domain,
-        app.status,
-      ]),
-    ]
-      .map((e) => e.join(','))
-      .join('\n');
+    const headers = [
+      "Name",
+      "City/State",
+      "Phone",
+      "Email",
+      "Submitted At",
+      "Domain",
+      "Status",
+    ];
+    const data = filteredApplications.map((app) => ({
+      Name: app.name,
+      "City/State": app.cityState,
+      Phone: app.phone,
+      Email: app.email,
+      "Submitted At": app.submittedAt,
+      Domain: app.domain,
+      Status: app.status,
+    }));
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'applications.csv';
-    link.click();
+    CSVService.generateCSV(headers, data, "applications.csv");
   };
 
   const indexOfLastApplication = currentPage * applicationsPerPage;
@@ -82,7 +84,10 @@ const Applications = () => {
 
       <div className="row mb-3">
         <div className="col-md-8">
-          <Filters onApplyFilters={handleApplyFilters} />
+          <Filters
+            domainsList={["Technology", "Healthcare", "Finance"]}
+            onSaveFilters={handleApplyFilters}
+          />
         </div>
         <div className="col-md-4">
           <div className="input-group">
@@ -100,18 +105,27 @@ const Applications = () => {
         </div>
       </div>
 
-      <div className="row">
-        {currentApplications.map((app) => (
-          <div className="col-md-6 mb-4" key={app.guid}>
-            <ApplicationCard
-              application={app}
-              onView={(guid) => console.log(`Viewing ${guid}`)}
-            />
-          </div>
-        ))}
+      <div className="table-responsive">
+        <table className="table table-striped table-hover">
+          <thead className="table-light">
+            <tr>
+              <th>Action</th>
+              <th>Name / City, State</th>
+              <th>Phone / Email</th>
+              <th>Submitted At (Eastern) / Domain</th>
+              <th>Updated By</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentApplications.map((app) => (
+              <ApplicationCard key={app.name} application={app} />
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <div className="d-flex justify-content-center">
+      <div className="d-flex justify-content-center mt-4">
         <Pagination
           currentPage={currentPage}
           totalPages={Math.ceil(filteredApplications.length / applicationsPerPage)}

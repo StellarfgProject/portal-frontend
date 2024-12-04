@@ -1,13 +1,23 @@
 .page-title {
-    font-size: 2.5rem;
-    font-weight: bold;
-  }
-  
-  .input-group input {
-    border-radius: 0.5rem 0 0 0.5rem;
-  }
-  
-  .input-group button {
-    border-radius: 0 0.5rem 0.5rem 0;
-  }
-  
+  font-family: "Poppins", sans-serif;
+  font-weight: 600;
+}
+
+.table {
+  font-family: "Roboto", sans-serif;
+  font-size: 0.95rem;
+}
+
+.table-hover tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-success {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.badge {
+  font-size: 0.85rem;
+  font-weight: 500;
+}

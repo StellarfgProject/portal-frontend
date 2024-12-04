@@ -1,0 +1,27 @@
+.page-title {
+    font-family: "Poppins", sans-serif;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+  
+  .section-title {
+    font-family: "Roboto", sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #333;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+  }
+  
+  .form-section {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .btn {
+    font-weight: 500;
+  }
+  
+  
