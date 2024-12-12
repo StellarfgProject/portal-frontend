@@ -6,7 +6,7 @@ class Application {
       state,
       phone_1,
       email,
-      ts,
+      ts_formatted,
       domain,
       status,
       guid,
@@ -15,7 +15,7 @@ class Application {
       this.cityState = `${city}, ${state}`;
       this.phone = phone_1;
       this.email = email;
-      this.submittedAt = ts;
+      this.submittedAt = ts_formatted;
       this.domain = domain;
       this.status = status;
       this.guid = guid;

@@ -1,13 +1,16 @@
 import React from "react";
 import "./Home.css"; // Custom styling
+import { useAuth } from "../contexts/AuthProvider";
 
 const Home = () => {
-  const username = "John Doe"; // Replace with dynamic username if needed
+
+  const {auth} = useAuth();
+  const username = auth.userDetails.first_name + " " + auth.userDetails.last_name; 
 
   return (
     <div className="container mt-4">
       {/* Welcome Message */}
-      <h1 className="text-primary">Welcome, {username}!</h1>
+      <h1 className="text-primary">Welcome, {username} !</h1>
 
       {/* Applications Section */}
       <section className="mt-4">

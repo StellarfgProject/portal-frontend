@@ -34,7 +34,7 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
     <div className="dropdown">
       {/* Toggle Button */}
       <button className="btn btn-primary dropdown-toggle" type="button" id="filtersDropdownButton" aria-expanded={showDropdown} onClick={() => setShowDropdown((prev) => !prev)}>
-        Filters <i class="bi bi-filter"></i>
+        Filters <i className="bi bi-filter"></i>
       </button>
 
       {/* Dropdown Content */}
@@ -62,7 +62,7 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
           <label className="form-label fw-bold">Date Range</label>
           <div className="d-flex gap-2">
             <div className="mb-3">
-              <label className="form-label small mb-0" for="startdate-filter">Start</label>
+              <label className="form-label small mb-0" htmlFor="startdate-filter">Start</label>
               <input type="date" className="form-control" id="startdate-filter" value={filters.dateRange.start}
                 onChange={(e) =>
                   setFilters({
@@ -73,7 +73,7 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
               />
             </div>
             <div className="form-group ">
-              <label className="form-label small mb-0" for="enddate-filter">End</label>
+              <label className="form-label small mb-0" htmlFor="enddate-filter">End</label>
               <input type="date" className="form-control" id="enddate-filter" value={filters.dateRange.end}
                 onChange={(e) =>
                   setFilters({

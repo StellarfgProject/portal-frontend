@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './Login.css';
+import authService from '../services/authService';
+import { useAuth } from '../contexts/AuthProvider';
 
 const Login = () => {
   const [step, setStep] = useState(1); // 1 = Email/Password, 2 = MFA
@@ -10,38 +12,26 @@ const Login = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']); // Array for 6-digit OTP
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [sessionId, setSessionId] = useState(null);
+  const [mfaToken, setMfaToken] = useState(null);
+  const {login} = useAuth();
 
   const navigate = useNavigate(); // React Router hook for navigation
 
-  // Simulate API response
-  const mockApiResponse = (data) => {
-    if (step === 1) {
-      return { valid: true, session_id: 'abc123' }; // Email validation response
-    }
-    if (step === 2) {
-      return { valid: true, message: 'Login successful!' }; // OTP validation response
-    }
-    return { valid: false };
-  };
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
-
-    // Simulate backend call
-    const response = mockApiResponse({ email, password });
+    const response = await authService.login({ email, password });
     if (response.valid) {
-      setMessage('Email validated. Please enter your MFA code.');
-      setSessionId(response.session_id);
-      setStep(2); // Move to MFA step
+      setMessage(response.message);
+      setMfaToken(response.mfa_token);
+      setStep(2);
     } else {
-      setError('Invalid email or password.');
+      setError(response.error);
     }
   };
 
-  const handleMfaSubmit = (e) => {
+  const handleMfaSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
@@ -49,13 +39,14 @@ const Login = () => {
     // Combine OTP into a single string
     const otpCode = otp.join('');
 
-    // Simulate backend call
-    const response = mockApiResponse({ sessionId, otp: otpCode });
+    const response = await authService.verifyMfa({mfa_token : mfaToken, mfa_code: otpCode});
     if (response.valid) {
+      login(response);
+
       setMessage(response.message); // Success message
       navigate('/'); // Redirect after successful login
     } else {
-      setError('Invalid MFA code. Please try again.');
+      setError(response.error);
     }
   };
 
@@ -149,7 +140,7 @@ const Login = () => {
       </div>
 
       <footer className="footer text-center text-white">
-        <p>&copy; 2024 Your Company. All rights reserved.</p>
+        <p>&copy; 2024 Stellar Financial Group. All rights reserved.</p>
       </footer>
     </div>
   );
