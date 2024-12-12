@@ -1,5 +1,6 @@
 import React from "react";
 import "./Navbar.css";
+import logo from "../assets/logo.png";
 
 const Navbar = ({ isAdmin }) => {
   return (
@@ -8,7 +9,7 @@ const Navbar = ({ isAdmin }) => {
         
         {/* Logo */}
         <a className="navbar-brand" href="/">
-          StellarFG
+          <img src={logo} alt="Logo" className="navbar-logo" />
         </a>
 
         {/* Navbar Content */}

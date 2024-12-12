@@ -1,26 +1,67 @@
-.page-title {
-    font-family: "Poppins", sans-serif;
-    font-size: 1.8rem;
-    font-weight: 600;
-  }
-  
-  .section-title {
-    font-family: "Roboto", sans-serif;
-    font-size: 1.25rem;
-    font-weight: 500;
-    color: lightseagreen;
-    padding-bottom: 5px;
-  }
-  
-  .form-section {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .btn {
-    font-weight: 500;
-  }
 
-  
+
+.form-section {
+  background-color: #fff;
+  padding: 10px 20px; /* Top/Bottom: 10px, Left/Right: 20px */
+  color: black;
+ 
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  width: 100%; /* Adjust width to align two fields in a row */
+  margin-left: 0; /* Align to the left */
+  padding: 0 0px; /* Add horizontal padding */
+  display: inline-block; /* Ensure two fields fit side by side */
+  vertical-align: top;
+}
+
+.form-group.short-width {
+  width: 100%; /* Reduced width for specific fields */
+  max-width: 100px; /* Limit maximum width */
+  margin-left: auto;
+  margin-right: auto; /* Center align smaller fields */
+}
+
+.form-control {
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 10px; /* Adjust padding inside the fields */
+  font-size: 1rem;
+  width: 100%; /* Ensure input fields take the full width of their container */
+}
+
+.container {
+  max-width: 1100px; /* Adjust as needed */
+  margin: 0 auto;
+}
+
+
+input[readonly] {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+select.form-control {
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Space fields evenly */
+  margin-bottom: 15px;
+}

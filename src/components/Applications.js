@@ -125,9 +125,11 @@ const Applications = () => {
 
   return (
     <div className="container mt-4">
+
       {error ? ( // Display error message if any
         <div className="alert alert-danger" role="alert">
           {error}
+
         </div>
       ) : (
         <>
@@ -145,7 +147,7 @@ const Applications = () => {
           <div className="row mb-3">
             <div className="col-md-8">
               <Filters
-                domainsList={["Technology", "Healthcare", "Finance"]}
+                domainsList={["autorefi.belco.org", "autorefi.cunj.com", "autorefi.regionalfcu.com", "autorefi.ohiovalleycu.org","checking.lubbocknational.com","autorefi.tremontcu.salrefi.com","autorefi.weststar.salrefi.com"]}
                 onSaveFilters={handleApplyFilters}
               />
             </div>

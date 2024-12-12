@@ -35,9 +35,10 @@ const ApplicationCard = ({ application }) => {
       </td>
       <td className="text-muted">Not Updated</td>
       <td>
-        <span className="badge bg-warning text-dark">{application.status}</span>
-        <button className="btn btn-danger btn-sm ms-2">Deny</button>
+        <span className="badge table-badge bg-warning text-dark">Pending</span>
+        <button className="btn table-btn btn-danger btn-sm ms-2">Deny</button>
       </td>
+
     </tr>
   );
 };

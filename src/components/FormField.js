@@ -17,41 +17,25 @@ const FormField = ({ name, value, iseditable = false, type = "text", options = [
     }
   };
 
-  return (
-    <div className="row mb-3">
-      {/* Label */}
-      <label className="col-4 col-form-label fw-bold">{name} :</label>
 
-      {/* Content */}
-      <div className="col-8 d-flex align-items-center">
-        {isEditing ? (
-          // Editable view
-          <>
-            <input
-              type={type}
-              className="form-control me-2"
-              value={currentValue}
-              onChange={(e) => setCurrentValue(e.target.value)}
-            />
-            <button type="button" className="btn btn-success btn-sm" onClick={handleSave}>
-              <i className="bi bi-check-circle-fill"></i>
-            </button>
-          </>
+    return (
+      <div className="form-group">
+        <label className="form-label">{name}:</label>
+        {iseditable ? (
+          <input
+            type="text"
+            className="form-control"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+          />
         ) : (
-          // Non-editable view
-          <>
-            <span className="me-2">{currentValue}</span>
-            {iseditable && (
-              <button type="button" className="btn btn-transparent btn-sm" onClick={handleEdit}>
-                <i className="bi bi-pencil-fill"></i>
-              </button>
-            )}
-          </>
+          <input type="text" className="form-control" value={value} readOnly />
         )}
       </div>
-    </div>
-  );
-};
+    );
+  };
+  
+
 
 FormField.propTypes = {
   name: PropTypes.string.isRequired,
