@@ -1,29 +1,43 @@
-body {
+/* body {
+  margin: 0;
+  padding: 0;
   font-family: 'Roboto', sans-serif;
-  color: #fff;
+} */
+
+.login-page {
+  position: relative;
+  height: 100vh;
+}
+
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
 }
 
 .login-container {
-  height: 100vh;
-  background-color: #222;
+  position: relative;
+  z-index: 2;
+  height: 100%;
 }
 
 .login-box {
   background: black;
   padding: 2rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  width: 100%;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   max-width: 400px;
+  width: 90%;
+  color: white;
 }
 
 .logo-img {
-  width: 80px;
+  width: 200px;
   height: auto;
-}
-
-.alert {
-  font-size: 0.9rem;
 }
 
 .otp-inputs {
@@ -43,4 +57,26 @@ body {
 .otp-box:focus {
   border-color: #4e54c8;
   outline: none;
+}
+
+/* Footer */
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #333;
+  padding: 1rem 0;
+}
+
+/* Background image slider */
+@keyframes slide {
+  0% { background-image: url('./../assets/0_sky-08.jpg'); }
+  50% { background-image: url('./../assets/0_sky-08.jpg'); }
+  100% { background-image: url('./../assets/0_sky-08.jpg'); }
+}
+
+.login-page {
+  animation: slide 15s infinite alternate;
+  background-size: cover;
+  background-position: center;
 }

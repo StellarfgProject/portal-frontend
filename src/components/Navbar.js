@@ -56,7 +56,7 @@ const Navbar = ({ isAdmin }) => {
               </ul>
             </div>
 
-            <ul class="navbar-nav flex-row ms-auto order-1 order-md-2">
+            <ul className="navbar-nav flex-row ms-auto order-1 order-md-2">
 
               {/* Mobile Toggle */}
               <button className="navbar-toggler me-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
