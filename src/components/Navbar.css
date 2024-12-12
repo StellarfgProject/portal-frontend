@@ -1,6 +1,20 @@
 /* Custom Navbar Styles */
-.bg-teal {
-    background: linear-gradient(90deg, #004d40, #00796b); /* Stylish gradient */
+  .navbar-logo {
+    height: 50px;
+    width: auto;
+    max-width: 100%;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+  }
+
+
+  .bg-teal {
+    background: linear-gradient(90deg, #000000, #000000); /* Stylish gradient */
   }
   
   .navbar-brand {

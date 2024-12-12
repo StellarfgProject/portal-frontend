@@ -113,7 +113,7 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
             Cancel
           </button>
           <button className="btn btn-success" onClick={handleSave}>
-            Save
+            Search
           </button>
         </div>
       </div>
