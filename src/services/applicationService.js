@@ -1,32 +1,60 @@
 import applicationsData from '../assets/sampleData.json';
+import axiosInstance from './axiosInstance';
 
-const getApplications = async (filters) => {
-  // Simulate filtering on the server-side (for demonstration)
-  let filteredData = applicationsData;
+const API_URL = process.env.REACT_APP_API_URL;
 
-  if (filters) {
-    const { domain, state, status, dateRange } = filters;
+const applicationService = {
 
-    if (domain) filteredData = filteredData.filter(app => app.domain.includes(domain));
-    if (state) filteredData = filteredData.filter(app => app.state === state);
-    if (status) filteredData = filteredData.filter(app => app.status === status);
-    if (dateRange) {
-      filteredData = filteredData.filter(
-        app =>
-          new Date(app.ts) >= new Date(dateRange[0]) &&
-          new Date(app.ts) <= new Date(dateRange[1])
-      );
+  getDefault: async () => {
+    try {
+      const response = await axiosInstance.get(`${API_URL}/applications/init`);
+      return { ...response.data, valid: true };
+    } catch (error) {
+      return {
+        valid: false,
+        error: error.response?.data?.error || 'An unknown error occurred',
+      };
     }
-  }
+  },
 
-  return filteredData;
-};
+  getByView: async (view, pageSize, pageIndex, filters = {}) => {
+    try {
+      const params = new URLSearchParams({
+        view,
+        pageSize,
+        pageIndex,
+        ...filters, // Spread filters to include additional query parameters if needed
+      });
 
-// Function to get application by ID
-const getApplicationById = async (id) => {
-  // Simulate finding an application by ID
-  const application = applicationsData.find(app => app.guid === id);
-  return application || {}; // Return null if no application is found
-};
+      const response = await axiosInstance.get(`${API_URL}/applications/getAll?${params.toString()}`);
+      return { ...response.data, valid: true };
+    } catch (error) {
+      return {
+        valid: false,
+        error: error.response?.data?.error || 'An unknown error occurred',
+      };
+    }
+  },
 
-export default { getApplications, getApplicationById };
+   getApplicationById : async (id) => {
+
+      try {
+        
+        const params = new URLSearchParams({guid: id});
+        const response = await axiosInstance.get(`${API_URL}/applications/get?${params.toString()}`);
+        return { ...response.data, valid: true };
+
+      } catch (error) {
+
+        return {
+          valid: false,
+          error: error.response?.data?.error || 'An unknown error occurred',
+        };
+        
+      }
+    }
+
+} 
+
+export default applicationService;
+

@@ -1,0 +1,30 @@
+{
+    "Traditional": {
+      "letter": "Letter",
+      "phone": "Phone Call",
+      "postcard": "Postcard",
+      "tv": "TV",
+      "radio": "Radio",
+      "billboard": "Billboard"
+    },
+    "Web Search": {
+      "google": "Google Search",
+      "youtube": "YouTube",
+      "bing": "Bing Search",
+      "yahoo": "Yahoo Search",
+      "search": "Other Web Search"
+    },
+    "Social Media": {
+      "facebook": "Facebook",
+      "instagram": "Instagram",
+      "twitter": "Twitter",
+      "linkedin": "LinkedIn",
+      "social": "Other Social Media"
+    },
+    "Other": {
+      "referral": "Referred by Friend/Family",
+      "email": "Email",
+      "online": "Online Ad",
+      "other": "Other"
+    }
+  }
