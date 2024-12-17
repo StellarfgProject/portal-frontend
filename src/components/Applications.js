@@ -15,7 +15,7 @@ const Applications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentView, setCurrentView] = useState("");
   const [pageSize] = useState(10);
-  const [error, setError] = useState(null); // State to track errors
+  const [error, setError] = useState(null); 
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,13 +25,15 @@ const Applications = () => {
       setError(null); // Reset error state
       try {
         if (location.pathname === "/applications") {
-          const { applications, view, valid, error } = await applicationService.getDefault();
-          if (!valid) throw new Error(error);
+          const data = await applicationService.getDefault();
+          
+          
+          if (!data.valid) throw new Error(error);
 
-          setApplications(applications);
-          setTotalPages(view.pagination.totalPages);
-          navigate(`/applications/${view}`, { replace: true });
-          setCurrentView(view);
+          setApplications(data.applications);
+          setTotalPages(data.pagination.totalPages);
+          navigate(`/applications/${data.view}`, { replace: true });
+          setCurrentView(data.view);
         } else {
           const view = location.pathname.split("/").pop();
           await fetchApplications(view, 1);
@@ -46,11 +48,12 @@ const Applications = () => {
   const fetchApplications = async (view, pageIndex) => {
     setError(null); // Reset error state
     try {
-      const { applications, pagination, valid, error } = await applicationService.getByView(
-        view,
-        pageSize,
-        pageIndex - 1
-      );
+      const data = await applicationService.getByView( view, pageSize,  pageIndex - 1);
+      
+      let applications = data.applications;
+      let pagination = data.pagination;
+      const valid = data.valid;
+      view = data.view;
 
       const apps =  applications.map((app) => new Application(app));
       if (!valid) throw new Error(error);
@@ -60,6 +63,7 @@ const Applications = () => {
       setCurrentPage(pageIndex);
       setCurrentView(view);
     } catch (err) {
+      console.log(err)
       setError(err.message || "Failed to load applications.");
     }
   };
@@ -126,10 +130,9 @@ const Applications = () => {
   return (
     <div className="container mt-4">
 
-      {error ? ( // Display error message if any
+      {error ? ( 
         <div className="alert alert-danger" role="alert">
-          {error}
-
+          {error} 
         </div>
       ) : (
         <>
@@ -195,7 +198,7 @@ const Applications = () => {
             />
           </div>
         </>
-      )}
+       )} 
     </div>
   );
 };
