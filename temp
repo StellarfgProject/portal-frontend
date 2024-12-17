@@ -1,0 +1,1155 @@
+<?php
+
+require_once('0.php');
+
+$app = pg_fetch_assoc(pg_query_params($db, 'SELECT *, to_char(ts, \'YYYY-MM-DD HH:MI AM\') AS ts_formatted, to_char(claimed_at, \'YYYY-MM-DD HH:MI AM\') AS claimed_at_formatted, to_char(status_updated_at, \'YYYY-MM-DD HH:MI AM\') AS status_updated_at_formatted FROM app WHERE guid = $2 AND domain IN (SELECT domain FROM domain_access WHERE email = $1)', [$user, $_GET['guid']]));
+// Fetch vehicle 2 data from the vehicle table
+$vehicle2 = pg_fetch_assoc(pg_query_params($db, '
+    SELECT v.* 
+    FROM vehicle v 
+    WHERE v.guid = $1', [$_GET['guid']])
+);
+$app['language'] = ($app['lang'] == 'es') ? 'Spanish' : 'English';
+$app['finance_or_refinance'] = ($app['fi_or_refi'] == 'fi') ? 'Finance' : 'Refinance';
+
+if (!$app) {
+	audit('review', 'failure', isset($_GET['guid']) ? $_GET['guid'] : NULL);
+    header('HTTP/1.0 401 Unauthorized');
+    echo '<h1>Unauthorized</h1>';
+    die();
+} else {
+	audit('review', 'single', $app['guid']);
+}
+
+$statuses = pg_fetch_all(pg_query_params($db, 'SELECT s.*, to_char(ts, \'YYYY-MM-DD HH:MI AM\') AS ts_formatted, h.first_name, h.last_name FROM status_log s LEFT JOIN human h ON s.email = h.email WHERE guid = $1 ORDER BY ts ASC', [$app['guid']]));
+
+if ($app['claimed_by'] == '' && isset($_POST['claim'])) {
+	pg_query_params($db, "UPDATE app SET claimed_by = $1, claimed_at = $2 WHERE guid = $3", [$user, 'now', $app['guid']]);
+	audit('claim', 'single', $app['guid']);
+	header("Location: {$_SERVER['REQUEST_URI']}");
+	die();
+}
+
+
+if (isset($_POST['update_status']) && ($_POST['new_status'] != "")) {
+	pg_query_params($db, "INSERT INTO status_log (ts, guid, status, status_note, email) values ($1, $2, $3, $4, $5)", ['now', $_GET['guid'], $_POST['new_status'], $_POST['new_status_note'], $user]);
+	pg_query_params($db, "UPDATE app SET status = $1, status_note = $2, status_updated_at = $3 WHERE guid = $4", [$_POST['new_status'], $_POST['new_status_note'], 'now', $_GET['guid']]);
+	header("Location: {$_SERVER['REQUEST_URI']}");
+	die();
+}
+
+/*
+echo "<pre>";
+print_r($user);
+echo "\n\n";
+print_r($app);
+die();
+*/
+
+/*
+echo "<pre>";
+print_r($apps);
+die();
+*/
+/*
+function get_form($db, $guid) {
+	$sql = <<<SQL
+		SELECT key, value FROM log l1
+		WHERE action = 'update'
+			AND guid = $1
+			AND ts = (SELECT max(ts) FROM log l2 WHERE l1.guid = l2.guid AND l1.key = l2.key)
+		ORDER BY key ASC, ts ASC
+SQL;
+	$form = [];
+	foreach (pg_fetch_all(pg_query_params($db, $sql, [$guid])) as $r) $form[$r['key']] = $r['value'];
+	return $form;
+}
+
+$forms = [];
+$sql = " select * from (select to_char(max(ts), 'YYYY-MM-DD HH:MI AM') as ts, guid from log where guid in (select distinct guid from log where key like 'consent') group by guid order by max(ts) desc) x";
+//echo "<pre>";
+//print_r(pg_fetch_all(pg_query($db, $sql)));
+//die();
+foreach(pg_fetch_all(pg_query($db, $sql)) as $r) {
+	$guid = $r['guid'];
+	$forms[$guid] = get_form($db, $guid);
+	$forms[$guid]['submitted_at'] = $r['ts'];
+}
+//print_r($forms);
+//$purl = "{$_SERVER['REQUEST_SCHEME']}://{$_SERVER['HTTP_HOST']}{$_SERVER['DOCUMENT_URI']}?guid={$_SESSION['guid']}#apply-now";
+
+*/
+?><html>
+<head>
+<title><?="{$app['first_name']} {$app['last_name']}"?> | SALrefi&#8480;</title>
+<link rel="stylesheet" href="bootstrap-4.2.1.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<style type="text/css">
+	body { background-color: rgba(234, 231, 208, 1.0) }
+	label, span { margin-bottom: 0.2em; }
+	.gray { color: gray; }
+	section { padding: 1em; }
+	div.section-container { /*min-width: 320px; max-width: 1024px; */ margin-left: auto; margin-right: auto; }
+	section:nth-child(even) { background-color: rgba(255, 255, 255, 1.0); }
+	section:nth-child(odd) { background-color: rgba(234, 231, 208, 1.0); }
+	nav, section#footer { background-color: rgb(34, 34, 34); }
+
+	table#applications tr:nth-child(even) { background-color: rgba(234, 231, 208, 1.0); }
+	table#applications th { vertical-align: bottom; }
+	table#applications td { vertical-align: middle; }
+	table#applications tr:hover { background-color: rgba(192, 192, 192, 1.0); }
+	.anchor { display: block; position: relative; top: -100px; visibility: hidden; }
+	h1, h2 { text-align: center; }
+	h1, h2, h3, h4, h5 { font-weight: bold; }
+	h1 { font-size: 200%; }
+	h2 { font-size: 125%; text-align: left; margin-top: 1em; }
+	.sal { color: rgb(218,170,0); }
+	.salbold { color: rgb(218,170,0); font-weight: bold; }
+	div#fineprint-container { font-size: 85%; }
+	blockquote.blockquote p { font-size: 80%; font-style: italic; }
+	.nobold { font-weight: normal; }
+	dl.faq dt { font-weight: normal; }
+	dl.faq dt a { color: black; text-decoration: none; }
+	dl.faq dt a:hover { color: #007bff; text-decoration: underline; }
+	dl.faq dd { color: rgb(108, 117, 125); padding-left: 1.2em; padding-bottom: 1em; }
+	dl.contact dt { font-size: 120%; }
+	.link { color: #007bff; }
+	.link:hover { text-decoration: underline; }
+	section#footer a { color: rgb(218,170,0); }
+	th, td { border-top: 1px solid rgb(192,192,192) !important; }
+	small.form-error { color: red !important; font-style: italic; display: none; }
+	section#thank-you { display: none; margin: 2em; }
+	@media (max-width: 512px) {
+		h1#tagline { font-size: 125%; line-height: 125%; }
+	}
+	@media (min-width: 513px) and (max-width: 768px) {
+		h1#tagline { font-size: 150%; line-height: 125%; }
+	}
+	@media (min-width: 769px) {
+		h1#tagline { font-size: 175%; line-height: 125%; }
+	}
+
+	@media print {
+		.noprint { display: none; }
+		.spacer { display: none; }
+		label { margin-bottom: 0; }
+		input, select { padding: 0; }
+		label, input, select { font-size: 75%; }
+		section { margin: 0; padding: 0; }
+		body { background-color: white; }
+		div.section-container { margin: 0.25em 1em; max-width: auto; }
+
+		div.print h2 { border-bottom: 1px solid black; margin-top: 0.5em; }
+		table.print { margin-bottom: 0.25em; }
+		table.print th { text-align: right; border: none; }
+		table.print td { padding: 0.25em 1em; border: none; }
+		table.print tr, table.print th, table.print td { border: none !important; }
+		table.print tr:nth-child(even) { background-color: rgba(255, 255, 255, 1.0); }
+		table.print tr:nth-child(odd) { background-color: rgba(234, 231, 208, 1.0); }
+	}
+	@media screen {
+		.print { display: none; }
+	}
+
+	.note { color: red; font-style: italic; display: block; }
+	.note:before { content: "NOTE: " }
+	.todo { color: red; font-weight: bold; font-size: 125%; display: block; }
+	.todo:before { content: "TODO: " }	.spacer { height: 5ex; }
+	.note, .todo { display: none; }
+</style>
+<script src="jquery-3.3.1.min.js"></script>
+<script type="text/javascript">
+	form = <?=json_encode($app)?>;
+	$(document).ready(() => {
+		Object.keys(form).forEach(e => { $("#"+e).val(form[e]); $("#print-"+e).text(form[e]); });
+	});
+</script>
+</head>
+<body>
+<nav class="navbar sticky-top noprint">
+	<div>
+		<!--<a class="btn btn-light sal" href="javascript:window.history.back();"><b>&larr; Back to applications</b></a></a>-->
+		<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			<img src="menu-hamburger-white-512x512.png" height="35">
+		</button>
+		<a class="btn btn-light sal" href="csv.php?<?= http_build_query(['guid' => $_GET['guid'], 'view' => 'single']) ?>"><b>Download CSV</b></a>
+	</div>
+	<div class="collapse navbar-collapse" id="navbarSupportedContent">
+		<ul class="navbar-nav mr-auto">
+			<li class="nav-item active"><a class="nav-link text-light" href="/?view=unclaimed"><?= $title['unclaimed'] ?></a></li>
+			<li class="nav-item"><a class="nav-link text-light" href="/?view=my"><?= $title['my'] ?></a></li>
+			<li class="nav-item"><a class="nav-link text-light" href="/?view=all"><?= $title['all'] ?></a></li>
+		</ul>
+	</div>
+	<a class="navbar-brand text-white" href="#top" style="font-size: 150%;"><img src="salrefi-white-1024x284.png" alt="SALrefi" height="40"></a>
+</nav>
+<?php if($app['domain'] == 'autorefi.dcfcu.salrefi.com'): ?>
+	<?php include "dcfcu_form.php"; ?>
+<?php elseif($app['domain'] == 'autorefi.cunj.salrefi.com'): ?>
+	<?php include "cunj_form.php"; ?>
+<?php elseif($app['domain'] == 'oecu.salrefi.com'): ?>
+	<?php include "oecu_form.php"; ?>
+<?php else: ?>
+	<section>
+		<div class="section-container noprint" style="max-width: 768px;">
+			<p class="print" style="text-align: right;"><img src="salrefi-black-1024x284.png" alt="SALrefi" height="40"></p>
+			<!--<p style="text-align: center; margin: 2ex 0;" class="noprint"><a class="btn btn-primary" href=""><b>Download applications as CSV</b></a></p>-->
+			<!--<p style="text-align: center;" class="noprint"><a class="btn btn-primary" href="application.php?guid=<?php echo $_GET['guid']; ?>"><b>Download application as CSV</b></a></p>-->
+			<div class="spacer print"></div>
+			<?php if($app['claimed_by'] == '') { ?>
+				<form action="" method="post">
+					<input type="hidden" name="guid" value="<?=$app['guid']?>">
+					<p style="text-align: center;" class="noprint">
+					<input class="btn btn-success" name="claim" type="submit" value="Claim this application"></p>
+				</form>
+			<?php } ?>
+			<?php if(!is_null($app['claimed_by'])) { ?>
+				<h2>Status (<a class="nobold" data-toggle="collapse" href="#collapse-status-update" role="button" aria-expanded="false" aria-controls="collapse-status-update"><span class="link">Update</a>)</h2>
+					<form method="post" action="" class="collapse" id="collapse-status-update">
+						<div class="form-row">
+							<div class="form-group col-md-12">
+								<!--<label for="status">Update status:</label>-->
+								<select id="new_status" name="new_status" class="form-control" required="true">
+									<option value="" selected="selected">&mdash; Select one &mdash;</option>
+									<optgroup label="Decisioned - Approved by FI">
+										<option value="Decisioned / Approved by FI / Accepted by applicant / Awaiting signed documentation">Accepted by applicant / Awaiting signed documentation</option>
+										<option value="Decisioned / Approved by FI / Accepted by applicant / Funded">Accepted by applicant / Funded</option>
+										<option value="Decisioned / Approved by FI / Accepted by applicant / Other">Accepted by applicant / Other</option>
+										<option value="Decisioned / Approved by FI / Rejected by applicant / Insufficient savings">Rejected by applicant / Insufficient savings</option>
+										<option value="Decisioned / Approved by FI / Rejected by applicant / No response">Rejected by applicant / No response</option>
+										<option value="Decisioned / Approved by FI / Rejected by applicant / Unwilling to change term">Rejected by applicant / Unwilling to change term</option>
+										<option value="Decisioned / Approved by FI / Rejected by applicant / Other">Rejected by applicant / Other</option>
+										<option value="Decisioned / Approved by FI / Other">Other</option>
+									</optgroup>
+									<optgroup label="Decisioned - Denied by FI">
+										<option value="Decisioned / Denied by FI / Charge-off/bankruptcy">Charge-off/bankruptcy</option>
+										<option value="Decisioned / Denied by FI / Collections">Collections</option>
+										<option value="Decisioned / Denied by FI / Delinquencies">Delinquencies</option>
+										<option value="Decisioned / Denied by FI / DTI">DTI</option>
+										<option value="Decisioned / Denied by FI / LTV">LTV</option>
+										<option value="Decisioned / Denied by FI / Insufficient credit history">Insufficient credit history</option>
+										<option value="Decisioned / Denied by FI / Insufficient employment history">Insufficient employment history</option>
+										<option value="Decisioned / Denied by FI / Other">Other</option>
+									</optgroup>
+									<optgroup label="Not Decisioned">
+										<option value="Not Decisioned / Applicant withdrew">Applicant withdrew</option>
+										<option value="Not Decisioned / Incomplete / Missing address info">Incomplete / Missing address info</option>
+										<option value="Not Decisioned / Incomplete / Missing consent to pull credit">Incomplete / Missing consent to pull credit</option>
+										<option value="Not Decisioned / Incomplete / Missing contact info">Incomplete / Missing contact info</option>
+										<option value="Not Decisioned / Incomplete / Missing employment info">Incomplete / Missing employment info</option>
+										<option value="Not Decisioned / Incomplete / Missing SSN">Incomplete / Missing SSN</option>
+										<option value="Not Decisioned / Incomplete / Missing vehicle info/VIN">Incomplete / Missing vehicle info/VIN</option>
+										<option value="Not Decisioned / Incomplete / Other">Incomplete / Other</option>
+										<option value="Not Decisioned / No application found">No application found</option>
+										<option value="Not Decisioned / Unable to contact applicant">Unable to contact applicant</option>
+										<option value="Not Decisioned / Other">Other</option>
+									</optgroup>
+								</select>
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group col-md-12">
+								<label for="new_status_note">Note(s):</label>
+								<textarea id="new_status_note" name="new_status_note" class="form-control" rows="3"></textarea>
+							</div>
+						</div>
+						<p style="text-align: center;"><input class="btn btn-success" name="update_status" type="submit" value="Update status"></p>
+					</form>
+
+				<div class="form-row" id="collapse-statuses">
+					<div class="form-group col-md-12">
+						<table class="table" id="applications">
+								<tr>
+									<th>Updated At (Eastern)</th>
+									<th>Updated By</th>
+									<th>Status</th>
+									<th>Note(s)</th>
+								</tr>
+					<?php if ($statuses) foreach($statuses as $i => $status) { ?>
+					<?php //echo "<pre>"; print_r($app); die(); ?>
+								<tr>
+									<td style="white-space: nowrap;"><?="${status['ts_formatted']}"?></td>
+									<td style="white-space: nowrap;"><?="${status['first_name']} ${status['last_name']}"?></td>
+									<td><?="${status['status']}"?></td>
+									<td><?="${status['status_note']}"?></td>
+								</tr>
+					<?php } else { ?>
+								<tr>
+									<td colspan="4" style="text-align: center; font-style: italic;">No status updates.</td>
+								</tr>
+					<?php } ?>
+							</table>
+						</div>
+					</div>
+				<!--
+				<div class="form-row">
+					<div class="form-group col-md-12">
+						<label for="status">Status:</label>
+						<input disabled="true" id="status" name="status" class="form-control" type="text">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="status_updated_at_formatted">Status last updated at:</label>
+						<input disabled="true" id="status_updated_at_formatted" name="status_updated_at_formatted" class="form-control" type="text">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-12">
+						<label for="status_note">Note(s):</label>
+						<textarea id="status_note" name="status_note" class="form-control" rows="3" disabled="true"></textarea>
+					</div>
+				</div>
+				-->
+			<?php } ?>
+			
+
+			<?php if ($app['fi_or_refi'] != 'home_equity'): ?>
+				<h2>Income, Credit, and Expenses</h2>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="monthly_income">Monthly income:</label>
+						<input disabled="true" id="monthly_income" name="monthly_income" class="form-control" placeholder="$" inputmode="numeric" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="past_year_repos">Self-reported repos in past year?</label>
+						<select disabled="true" id="past_year_repos" name="past_year_repos" class="form-control">
+							<option value="yes">Yes</option>
+							<option value="no">No</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="self_reported_fico">Self-reported FICO:</label>
+						<select disabled="true" id="self_reported_fico" name="self_reported_fico" class="form-control" required="true">
+							<option value=""></option>
+							<option value="721-or-higher">721 or higher</option>
+							<option value="700-to-720">700 to 720</option>
+							<option value="654-to-699">654 to 699</option>
+							<option value="605-to-653">605 to 653</option>
+							<option value="555-to-604">555 to 604</option>
+							<option value="554-or-lower">554 or lower</option>
+						</select>
+		<?php /*
+						<span class="note">glossary/help gives free/common sources for FICO</span>
+		*/ ?>
+					</div>
+					<div class="form-group col-md-6">
+						<label for="bankruptcy">Self-reported bankruptcy?</label>
+						<select disabled="true"  id="bankruptcy" name="bankruptcy" class="form-control" required="true">
+							<option value=""></option>
+							<option value="yes">Yes</option>
+							<option value="no">No</option>
+						</select>
+					</div>
+			</div>
+
+
+				<div class="form-row">
+				<div class="form-group col-md-6">
+       				 <label for="rent_own">Rent or Own</label>
+       				 <input disabled="true" id="rent_own" name="rent_own" class="form-control" required="true">
+    			</div>
+					<div class="form-group col-md-6">
+						<label for="monthly_home_payment">Monthly rent/mortgage payment:</label>
+						<input disabled="true" id="monthly_home_payment" name="monthly_home_payment" class="form-control" placeholder="$" inputmode="numeric" required="true">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="other_expenses">Other monthly loan/credit expenses:</label>
+						<input disabled="true" id="other_expenses" name="other_expenses" class="form-control" placeholder="$" inputmode="numeric" required="true">
+					</div>
+				</div>
+
+				<h2>Vehicle</h2>
+				<div class="vehicles">
+					<div class="vehicle">
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label for="make">Make:</label>
+								<input disabled="true" id="make" name="make" class="form-control" required="true">
+							</div>
+							<div class="form-group col-md-6">
+								<label for="model">Model:</label>
+								<input disabled="true" id="model" name="model" class="form-control" required="true">
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label for="model_year">Year:</label>
+								<select disabled="true" id="model_year" name="model_year" class="form-control" required="true">
+									<option value="">&mdash; Select one &mdash;</option>
+									<option value="2025">2025</option>
+									<option value="2025">2024</option>
+									<option value="2025">2023</option>
+									<option value="2025">2022</option>
+									<option value="2021">2021</option>
+									<option value="2020">2020</option>
+									<option value="2019">2019</option>
+									<option value="2018">2018</option>
+									<option value="2017">2017</option>
+									<option value="2016">2016</option>
+									<option value="2015">2015</option>
+									<option value="2014">2014</option>
+									<option value="2013">2013</option>
+									<option value="2012">2012</option>
+									<option value="2011">2011</option>
+									<option value="2010">2010</option>
+									<option value="2009-or-older">2009 or older</option>
+									<option value="older">2013 or older</option>
+								</select>
+							</div>
+
+							<div class="form-group col-md-6">
+								<label for="mileage">Mileage:</label>
+								<input disabled="true" id="mileage" name="mileage" class="form-control" required="true">
+								<!--
+								<select disabled="true" id="mileage" name="mileage" class="form-control" required="true">
+									<option value="">&mdash; Select one &mdash;</option>
+									<option value="0-to-9999">Under 10,000</option>
+									<option value="10000-to-19999">10,000 to 19,999</option>
+									<option value="20000-to-29999">20,000 to 29,999</option>
+									<option value="30000-to-39999">30,000 to 39,999</option>
+									<option value="40000-to-49999">40,000 to 49,999</option>
+									<option value="50000-to-59999">50,000 to 59,999</option>
+									<option value="60000-to-69999">60,000 to 69,999</option>
+									<option value="70000-to-79999">70,000 to 79,999</option>
+									<option value="80000-to-89999">80,000 to 89,999</option>
+									<option value="90000-to-99999">90,000 to 99,999</option>
+									<option value="100000-or-more">100,000 or more</option>
+									<option value="0-to-24999">Under 25,000</option>
+									<option value="25000-to-49999">25,000 to 49,999</option>
+									<option value="50000-to-74999">50,000 to 74,999</option>
+									<option value="75000-to-99999">75,000 to 99,999</option>
+								</select>
+								-->
+							</div>
+						</div>
+						<div class="form-row">
+							<div class="form-group col-md-6">
+								<label for="vin">VIN (Vehicle Identification Number):</label>
+								<input disabled="true" id="vin" name="vin" class="form-control" required="true">
+							</div>
+							<div class="form-group col-md-6">
+								<label for="vin">Confirm VIN:</label>
+								<input disabled="true" id="vin_confirm" name="vin_confirm" class="form-control" required="true">
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<h2>Current Loan</h2>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="original_balance">Self-reported original loan amount:</label>
+						<input disabled="true" id="original_balance" name="original_balance" class="form-control" inputmode="numeric" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="original_term">Self-reported original loan length (months):</label>
+						<input disabled="true" id="original_term" name="original_term" class="form-control" inputmode="numeric" required="true">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="current_monthly_payment">Monthly payment:</label>
+						<input disabled="true" id="current_monthly_payment" name="current_monthly_payment" class="form-control" placeholder="$" inputmode="numeric" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="current_payoff">Remaining loan/payoff amount:</label>
+						<input disabled="true" id="current_payoff" name="current_payoff" class="form-control" placeholder="$" inputmode="numeric" required="true">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="current_remaining_term">Remaining term:</label>
+						<input disabled="true" id="current_remaining_term" name="current_remaining_term" class="form-control" placeholder="Number of months" inputmode="numeric" maxlength="2" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="origination_date">Self-reported loan origination date:</label>
+						<input disabled="true" id="origination_date" name="origination_date" class="form-control" placeholder="mm/dd/yyyy" type="text" required="true" required="true">
+					</div>
+
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="next_payment_date">Date of next payment:</label>
+						<input disabled="true" id="next_payment_date" name="next_payment_date" class="form-control" placeholder="mm/dd/yyyy" type="text" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="lien_holder">Lien holder:</label>
+						<input disabled="true" id="lien_holder" name="lien_holder" class="form-control" required="true">
+					</div>
+				</div>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="self_reported_apr">Self-reported APR:</label>
+						<input disabled="true" id="self_reported_apr" name="self_reported_apr" class="form-control" inputmode="numeric">
+					</div>
+				</div>
+
+				<h2>New Loan</h2>
+				<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="estimated_balance">Estimated loan amount:</label>
+						<input disabled="true" id="estimated_balance" name="estimated_balance" class="form-control fi-only" placeholder="$" inputmode="numeric">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="estimated_term">Estimated loan length (months):</label>
+						<input disabled="true" id="estimated_term" name="estimated_term" class="form-control fi-only" placeholder="Number of months" inputmode="numeric">
+					</div>
+				</div>
+				<?php if (!empty($vehicle2)): ?>
+    <h2>Vehicle 2 Details</h2>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="vin_number_2">VIN Number</label>
+            <input disabled="true" id="vin_number_2" name="vin_number_2" 
+                   class="form-control" value="<?= $vehicle2['vin_number_2'] ?>" required="true">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="make_2">Make</label>
+            <input disabled="true" id="make_2" name="make_2" 
+                   class="form-control" value="<?= $vehicle2['make_2'] ?>" required="true">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="model_2">Model</label>
+            <input disabled="true" id="model_2" name="model_2" 
+                   class="form-control" value="<?= $vehicle2['model_2'] ?>" required="true">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="model_year_2">Model Year</label>
+            <input disabled="true" id="model_year_2" name="model_year_2" 
+                   class="form-control" value="<?= $vehicle2['model_year_2'] ?>" required="true">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="mileage_2">Mileage</label>
+            <input disabled="true" id="mileage_2" name="mileage_2" 
+                   class="form-control" value="<?= $vehicle2['mileage_2'] ?>" required="true">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="monthly_loan_2">Monthly Loan</label>
+            <input disabled="true" id="monthly_loan_2" name="monthly_loan_2" 
+                   class="form-control" value="<?= $vehicle2['monthly_loan_2'] ?>" required="true">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="remaining_loan_2">Remaining Loan</label>
+            <input disabled="true" id="remaining_loan_2" name="remaining_loan_2" 
+                   class="form-control" value="<?= $vehicle2['remaining_loan_2'] ?>" required="true">
+        </div>
+        <div class="form-group col-md-6">
+            <label for="current_lender_2">Current Lender</label>
+            <input disabled="true" id="current_lender_2" name="current_lender_2" 
+                   class="form-control" value="<?= $vehicle2['current_lender_2'] ?>" required="true">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label for="next_payment_date_2">Next Payment Date</label>
+            <input disabled="true" id="next_payment_date_2" name="next_payment_date_2" 
+                   class="form-control" value="<?= $vehicle2['next_payment_date_2'] ?>" required="true">
+        </div>
+    </div>
+<?php endif; ?>
+
+				<h2>Employment</h2>
+
+				<div class="form-row">
+				<div class="form-group col-md-6">
+        			<label for="employment_status">Employment Status</label>
+       				 <input disabled="true" id="employment_status" name="employment_status" class="form-control" required="true">
+    			</div>
+				</div>
+
+				<div id="employment_questions">
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="job_title">Your job title:</label>
+							<input disabled="true" id="job_title" name="job_title" class="form-control" required="true">
+						</div>
+						<div class="form-group col-md-6">
+							<label for="employer_since">Current employer since:</label>
+							<input disabled="true" id="employer_since" name="employer_since" class="form-control" type="text" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-6">
+							<label for="employer">Employer's name:</label>
+							<input disabled="true" id="employer" name="employer" class="form-control" required="true">
+						</div>
+						<div class="form-group col-md-6">
+							<label for="employer_phone_1">Employer's phone number:</label>
+							<input disabled="true" id="employer_phone_1" name="employer_phone_1" class="form-control" type="tel" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-9">
+							<label for="employer_address_1">Employer's street address:</label>
+							<input disabled="true" id="employer_address_1" name="employer_address_1" class="form-control" required="true">
+						</div>
+						<div class="form-group col-md-3">
+							<label for="employer_address_2">Employer's suite/unit #:</label>
+							<input disabled="true" id="employer_address_2" name="employer_address_2" class="form-control">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-5">
+							<label for="employer_city">Employer's city:</label>
+							<input disabled="true" id="employer_city" name="employer_city" class="form-control" required="true">
+						</div>
+						<div class="form-group col-md-4">
+							<label for="employer_state">Employer's state:</label>
+							<select disabled="true" id="employer_state" name="employer_state" class="form-control" required="true">
+								<option value="">&mdash; Select one &mdash;</option>
+								<option value="AL">Alabama</option>
+								<option value="AK">Alaska</option>
+								<option value="AZ">Arizona</option>
+								<option value="AR">Arkansas</option>
+								<option value="CA">California</option>
+								<option value="CO">Colorado</option>
+								<option value="CT">Connecticut</option>
+								<option value="DE">Delaware</option>
+								<option value="DC">District of Columbia</option>
+								<option value="FL">Florida</option>
+								<option value="GA">Georgia</option>
+								<option value="HI">Hawaii</option>
+								<option value="ID">Idaho</option>
+								<option value="IL">Illinois</option>
+								<option value="IN">Indiana</option>
+								<option value="IA">Iowa</option>
+								<option value="KS">Kansas</option>
+								<option value="KY">Kentucky</option>
+								<option value="LA">Louisiana</option>
+								<option value="ME">Maine</option>
+								<option value="MD">Maryland</option>
+								<option value="MA">Massachusetts</option>
+								<option value="MI">Michigan</option>
+								<option value="MN">Minnesota</option>
+								<option value="MS">Mississippi</option>
+								<option value="MO">Missouri</option>
+								<option value="MT">Montana</option>
+								<option value="NE">Nebraska</option>
+								<option value="NV">Nevada</option>
+								<option value="NH">New Hampshire</option>
+								<option value="NJ">New Jersey</option>
+								<option value="NM">New Mexico</option>
+								<option value="NY">New York</option>
+								<option value="NC">North Carolina</option>
+								<option value="ND">North Dakota</option>
+								<option value="OH">Ohio</option>
+								<option value="OK">Oklahoma</option>
+								<option value="OR">Oregon</option>
+								<option value="PA">Pennsylvania</option>
+								<option value="RI">Rhode Island</option>
+								<option value="SC">South Carolina</option>
+								<option value="SD">South Dakota</option>
+								<option value="TN">Tennessee</option>
+								<option value="TX">Texas</option>
+								<option value="UT">Utah</option>
+								<option value="VT">Vermont</option>
+								<option value="VA">Virginia</option>
+								<option value="WA">Washington</option>
+								<option value="WV">West Virginia</option>
+								<option value="WI">Wisconsin</option>
+								<option value="WY">Wyoming</option>
+							</select>
+						</div>
+						<div class="form-group col-md-3">
+							<label for="employer_zip">Employer's ZIP code:</label>
+							<input disabled="true" id="employer_zip" name="employer_zip" class="form-control" inputmode="numeric" required="true">
+						</div>
+					</div>
+
+
+					<?php if (!empty($app['co_borrower_first_name']) && !empty($app['co_borrower_last_name'])): ?>
+					<h2>Co-Borrower Details</h2>
+					<div class="form-row">
+					<div class="form-group col-md-6">
+						<label for="co_borrower_first_name">First Name</label>
+						<input disabled="true" id="co_borrower_first_name" name="co_borrower_first_name" class="form-control" required="true">
+					</div>
+					<div class="form-group col-md-6">
+						<label for="co_borrower_last_name">Last Name</label>
+						<input disabled="true" id="co_borrower_last_name" name="co_borrower_last_name" class="form-control" required="true">
+					</div>
+					</div>
+					<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_phone_1">Phone Number</label>
+        <input disabled="true" id="co_borrower_phone_1" name="co_borrower_phone_1" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_email">Email Address</label>
+        <input disabled="true" id="co_borrower_email" name="co_borrower_email" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_dob">Date of Birth</label>
+        <input disabled="true" id="co_borrower_dob" name="co_borrower_dob" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_marital_status">Marital Status</label>
+        <input disabled="true" id="co_borrower_marital_status" name="co_borrower_marital_status" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_license_no">Driver's License Number</label>
+        <input disabled="true" id="co_borrower_license_no" name="co_borrower_license_no" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_drivers_license_type">Driver's License Type</label>
+        <input disabled="true" id="co_borrower_drivers_license_type" name="co_borrower_drivers_license_type" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_drivers_license_issue_date">Driver's License Issue Date</label>
+        <input disabled="true" id="co_borrower_drivers_license_issue_date" name="co_borrower_drivers_license_issue_date" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_drivers_license_expire_date">Driver's License Expiry Date</label>
+        <input disabled="true" id="co_borrower_drivers_license_expire_date" name="co_borrower_drivers_license_expire_date" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_license_state">License State</label>
+        <input disabled="true" id="co_borrower_license_state" name="co_borrower_license_state" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_ssn">SSN</label>
+        <input disabled="true" id="co_borrower_ssn" name="co_borrower_ssn" class="form-control" required="true">
+    </div>
+</div>
+<h2>Co-borrower Employment Details</h2>
+
+
+		<div class="form-row">
+			<div class="form-group col-md-6">
+        	<label for="co_borrower_employment_status">Employment Status</label>
+        	<input disabled="true" id="co_borrower_employment_status" name="co_borrower_employment_status" class="form-control" required="true">
+    		</div>
+		</div>
+
+		<div class="form-row">
+    	<div class="form-group col-md-6">
+        	<label for="co_borrower_employer">Employer Name</label>
+        	<input disabled="true" id="co_borrower_employer" name="co_borrower_employer" class="form-control" required="true">
+    	</div>
+		
+    	<div class="form-group col-md-6">
+        	<label for="co_borrower_employer_since">Employed Since</label>
+        	<input disabled="true" id="co_borrower_employer_since" name="co_borrower_employer_since" class="form-control" required="true">
+    	</div>
+    	</div>
+
+		<div class="form-row">
+		<div class="form-group col-md-6">
+        	<label for="co_borrower_job_title">Job Title</label>
+        	<input disabled="true" id="co_borrower_job_title" name="co_borrower_job_title" class="form-control" required="true">
+    	</div>
+	    <div class="form-group col-md-6">
+    	    <label for="co_borrower_employer_phone_1">Employer Phone Number</label>
+        	<input disabled="true" id="co_borrower_employer_phone_1" name="co_borrower_employer_phone_1" class="form-control" required="true">
+    	</div>
+		</div>
+
+		<div class="form-row">
+    	<div class="form-group col-md-6">
+        	<label for="co_borrower_employer_address_1">Employer Street Address</label>
+        	<input disabled="true" id="co_borrower_employer_address_1" name="co_borrower_employer_address_1" class="form-control" required="true">
+    	</div>
+	    <div class="form-group col-md-6">
+    	    <label for="co_borrower_employer_city">Employer City</label>
+        	<input disabled="true" id="co_borrower_employer_city" name="co_borrower_employer_city" class="form-control" required="true">
+    	</div>
+		</div>
+
+		<div class="form-row">
+   		<div class="form-group col-md-6">
+         	<label for="co_borrower_employer_state">Employer State</label>
+        	<input disabled="true" id="co_borrower_employer_state" name="co_borrower_employer_state" class="form-control" required="true">
+    	</div>
+    	<div class="form-group col-md-6">
+        	<label for="co_borrower_employer_zip">Employer ZIP Code</label>
+        	<input disabled="true" id="co_borrower_employer_zip" name="co_borrower_employer_zip" class="form-control" required="true">
+    	</div>
+		</div>
+</div>
+<h2>Co-borrower Home Address</h2>
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_address_1">Street Address</label>
+        <input disabled="true" id="co_borrower_address_1" name="co_borrower_address_1" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_address_2">Apartment/Unit #</label>
+        <input disabled="true" id="co_borrower_address_2" name="co_borrower_address_2" class="form-control">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_city">City</label>
+        <input disabled="true" id="co_borrower_city" name="co_borrower_city" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_state">State</label>
+        <input disabled="true" id="co_borrower_state" name="co_borrower_state" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_zip">ZIP Code</label>
+        <input disabled="true" id="co_borrower_zip" name="co_borrower_zip" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_address_since">Living Since</label>
+        <input disabled="true" id="co_borrower_address_since" name="co_borrower_address_since" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_gross_income">Monthly Gross Income</label>
+        <input disabled="true" id="co_borrower_gross_income" name="co_borrower_gross_income" class="form-control" required="true">
+    </div>
+    <div class="form-group col-md-6">
+        <label for="co_borrower_rent_own">Rent or Own</label>
+        <input disabled="true" id="co_borrower_rent_own" name="co_borrower_rent_own" class="form-control" required="true">
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label for="co_borrower_monthly_home_payment">Monthly Home Payment</label>
+        <input disabled="true" id="co_borrower_monthly_home_payment" name="co_borrower_monthly_home_payment" class="form-control" required="true">
+    </div>
+</div>
+
+
+<?php endif; ?>
+
+
+				</div>
+				<?php else: ?>
+
+					<h2>Income, Credit, and Expenses</h2>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_income">Monthly income:</label>
+							<input disabled="true" id="monthly_income" name="monthly_income" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_home_payment">Monthly mortgage payment:</label>
+							<input disabled="true" id="monthly_home_payment" name="monthly_home_payment" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="second_mortgage">2nd Mortgage:</label>
+							<input disabled="true" id="second_mortgage" name="second_mortgage" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="other_expenses">Other monthly loan/credit expenses:</label>
+							<input disabled="true" id="other_expenses" name="other_expenses" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+
+					<h2>Provide loan information:</h2>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="amount_requested">Amount Requested:</label>
+							<input disabled="true"  id="amount_requested" name="amount_requested" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="loan_terms">Term (months):</label>
+							<select disabled="true"  id="loan_terms" name="loan_terms" class="form-control" required="true">
+								<option value="60">60</option>
+								<option value="72">72</option>
+								<option value="78">78</option>
+								<option value="84">84</option>
+								<option value="96">96</option>
+								<option value="108">108</option>
+								<option value="110">110</option>
+								<option value="120">120</option>
+								<option value="132">132</option>
+								<option value="144">144</option>
+								<option value="166">166</option>
+								<option value="168">168</option>
+								<option value="180">180</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="estimated_property_value">Estimated Property Value:</label>
+							<input disabled="true"  id="estimated_property_value" name="estimated_property_value" class="form-control" placeholder="$" inputmode="numeric" required="true">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="intended_occupy_property">How do you intend to occupy the property?</label>
+							<select disabled="true"  id="intended_occupy_property" name="intended_occupy_property" class="form-control" required="true">
+								<option value="Primary Residence">Primary Residence</option>
+								<option value="Rental/Investment">Rental/Investment</option>
+								<option value="Second Home">Second Home</option>
+							</select>
+						</div>
+					</div>
+
+					<h2>Expected Monthly Expenses:</h2>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_hazard_insurance">Monthly Hazard Insurance:</label>
+							<input disabled="true"  id="monthly_hazard_insurance" name="monthly_hazard_insurance" class="form-control" placeholder="$" inputmode="numeric">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_real_estate_taxes">Monthly Real Estate Taxes:</label>
+							<input disabled="true"  id="monthly_real_estate_taxes" name="monthly_real_estate_taxes" class="form-control" placeholder="$" inputmode="numeric">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_mortgage_insurance">Monthly Mortgage Insurance:</label>
+							<input disabled="true"  id="monthly_mortgage_insurance" name="monthly_mortgage_insurance" class="form-control" placeholder="$" inputmode="numeric">
+						</div>
+					</div>
+					<div class="form-row">
+						<div class="form-group col-md-12">
+							<label for="monthly_homeowner_assn_dues">Monthly Homeonwer Assn. Dues:</label>
+							<input disabled="true"  id="monthly_homeowner_assn_dues" name="monthly_homeowner_assn_dues" class="form-control" placeholder="$" inputmode="numeric">
+						</div>
+					</div>
+
+				<?php endif; ?>
+
+		</div>
+
+		<div class="section-container print">
+			<p class="print" style="text-align: right;"><img src="salrefi-black-1024x284.png" alt="SALrefi" height="40"></p>
+			<!--<p style="text-align: center; margin: 2ex 0;" class="noprint"><a class="btn btn-primary" href=""><b>Download applications as CSV</b></a></p>-->
+			<!--<p style="text-align: center;" class="noprint"><a class="btn btn-primary" href="application.php?guid=<?php echo $_GET['guid']; ?>"><b>Download application as CSV</b></a></p>-->
+			<div class="spacer print"></div>
+			<h2>Application</h2>
+			<table class="print">
+				<tr>
+					<th>Loan Type:</th><td id="print-finance_or_refinance"></td>
+				<tr>
+					<th>Application owner:</th><td id="print-claimed_by"></td>
+					<th>Application claimed at:</th><td id="print-claimed_at_formatted"></td>
+				</tr>
+				<tr>
+					<th>Assigned domain:</th><td id="print-domain"></td>
+					<th>Source domain:</th><td id="print-source_domain"></td>
+				</tr>
+				<tr>
+					<th>Application ID:</th><td id="print-guid"></td>
+					<th>Language:</th><td id="print-language"></td>
+				</tr>
+				<tr>
+					<th>Submitted at:</th><td id="print-ts_formatted"></td>
+					<th>Submitted from IP:</th><td id="print-ip"></td>
+				</tr>
+			</table>
+
+			<h2>Applicant</h2>
+			<table class="print">
+				<tr>
+					<th>Promo code:</th><td id="print-promo_code"></td>
+					<th>Date of birth:</th><td id="print-dob"></td>
+				</tr>
+				<tr>
+					<th>First name:</th><td id="print-first_name"></td>
+					<th>Last name:</th><td id="print-last_name"></td>
+				</tr>
+				<tr>
+					<th>Phone number:</th><td id="print-phone_1"></td>
+					<th>Email address:</th><td id="print-email"></td>
+				</tr>
+				<tr>
+					<th>License/State ID #:</th><td id="print-license_no"></td>
+					<th>License/ID state:</th><td id="print-license_state"></td>
+				</tr>
+				<tr>
+					<th>SSN:</th><td id="print-ssn"></td>
+					<th>Confirm SSN:</th><td id="print-ssn_confirm"></td>
+				</tr>
+				<tr>
+					<th>Marital status:</th><td id="print-marital_status"></td>
+					<th></th><td></td>
+				</tr>
+				<tr>
+					<th>Street address:</th><td id="print-address_1"></td>
+					<th>Apartment/unit #:</th><td id="print-address_2"></td>
+				</tr>
+				<tr>
+					<th>City:</th><td id="print-city"></td>
+					<th>State:</th><td id="print-state"></td>
+				</tr>
+				<tr>
+					<th>ZIP code:</th><td id="print-zip"></td>
+					<th>Address since:</th><td id="print-address_since"></td>
+				</tr>
+			</table>
+
+			<?php if ($app['fi_or_refi'] != 'home_equity'): ?>
+				<h2>Income, Credit, and Expenses</h2>
+				<table class="print">
+					<tr>
+						<th>Monthly income:</th><td id="print-monthly_income"></td>
+						<th>Other monthly loan/credit expenses:</th><td id="print-other_expenses"></td>
+					</tr>
+					<tr>
+						<th>Rent or Own?</th><td id="print-rent_own"></td>
+						<th>Monthly rent/mortgage payment:</th><td id="print-monthly_home_payment"></td>
+					</tr>
+					<tr>
+						<th>Self-reported FICO:</th><td id="print-self_reported_fico"></td>
+						<th>Self-reported bankruptcy?</th><td id="print-bankruptcy"></td>
+					</tr>
+					<tr>
+						<th>Self-reported repos in past year?</th><td id="print-past_year_repos"></td>
+					</tr>
+				</table>
+
+				<h2>Vehicle</h2>
+				<table class="print">
+					<tr>
+						<th>Make:</th><td id="print-make"></td>
+						<th>Model:</th><td id="print-model"></td>
+					</tr>
+					<tr>
+						<th>Year:</th><td id="print-model_year"></td>
+						<th>Mileage:</th><td id="print-mileage"></td>
+					</tr>
+					<tr>
+						<th>VIN:</th><td id="print-vin"></td>
+						<th>Confirm VIN:</th><td id="print-vin_confirm"></td>
+					</tr>
+				</table>
+
+
+				<h2>Current Loan</h2>
+				<table class="print">
+					<tr>
+						<th>Monthly payment:</th><td id="print-current_monthly_payment"></td>
+						<th>Remaining loan/payoff amount:</th><td id="print-current_payoff"></td>
+					</tr>
+					<tr>
+						<th>Remaining term:</th><td id="print-current_remaining_term"></td>
+						<th>Date of next payment:</th><td id="print-next_payment_date"></td>
+					</tr>
+					<tr>
+						<th>Lien holder:</th><td id="print-lien_holder"></td>
+						<th></th><td></td>
+					</tr>
+					<tr>
+						<th>Self-reported APR:</th><td id="print-self_reported_apr"></td>
+						<th>Self-reported original loan amount:</th><td id="print-original_balance"></td>
+					</tr>
+					<tr>
+						<th>Self-reported original term:</th><td id="print-original_term"></td>
+						<th>Self-reported origination date:</th><td id="print-origination_date"></td>
+					</tr>
+				</table>
+
+				<h2>New Loan</h2>
+				<table class="print">
+					<tr>
+						<th>Estimated loan amount:</th><td id="print-estimated_balance"></td>
+						<th>Estimated loan length (months):</th><td id="print-estimated_term"></td>
+					</tr>
+				</table>
+			<?php endif; ?>
+
+			<h2>Employment</h2>
+			<table class="print">
+				<tr>
+					<th>Employment status:</th><td id="print-employment_status"></td>
+					<th>Your job title:</th><td id="print-job_title"></td>
+				</tr>
+				<tr>
+					<th>Current employer since:</th><td id="print-employer_since"></td>
+					<th>Employer's name:</th><td id="print-employer"></td>
+				</tr>
+				<tr>
+					<th>Employer's phone number:</th><td id="print-employer_phone_1"></td>
+					<th></th><td></td>
+				</tr>
+				<tr>
+					<th>Employer's street address:</th><td id="print-employer_address_1"></td>
+					<th>Employer's suite/unit #:</th><td id="print-employer_address_2"></td>
+				</tr>
+				<tr>
+					<th>Employer's city:</th><td id="print-employer_city"></td>
+					<th>Employer's state:</th><td id="print-employer_state"></td>
+				</tr>
+				<tr>
+					<th>Employer's ZIP code:</th><td id="print-employer_zip"></td>
+					<th></th><td></td>
+				</tr>
+			</table>
+
+
+
+
+			
+
+			<h2>Miscellaneous</h2>
+			<table class="print">
+				<tr>
+					<th>How did you hear about us?</th><td id="print-whence"></td>
+					<th></th><td></td>
+				</tr>
+			</table>
+			<table class="print">
+				<tr>
+					<th colspan="4" style="text-align: left;">Is there any additional information you think we may need to help finance your loan?</th>
+				</tr>
+				<tr>
+					<td colspan="4" id="print-comments" style="white-space: pre-line;"></td>
+				</tr>
+			</table>
+		</div>
+
+	</section>
+<?php endif ?>
+<section class="text-light noprint" id="footer">
+	<div class="section-container" id="fineprint-container">
+		<p style="text-align: center;">&copy; 2017&ndash;2021 Stellar&nbsp;Auto&nbsp;Loans, LLC.  All Rights Reserved.</p>
+	</div>
+</section>
+<script src="popper-1.14.6.min.js"></script>
+<script src="bootstrap-4.2.1.min.js"></script>
+<script type="text/javascript">
+	$('.navbar-nav>li>a').on('click', function(e){
+		$('.navbar-collapse').collapse('hide');
+		setTimeout(function() { window.location = e.target.href; }, 250);
+		return false;
+	});
+</script>
+</body>
+</html>
