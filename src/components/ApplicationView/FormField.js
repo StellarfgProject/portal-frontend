@@ -120,10 +120,10 @@ const FormField = ({
 
 FormField.propTypes = {
   name: PropTypes.string.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.string,
   iseditable: PropTypes.bool,
   type: PropTypes.oneOf(["text", "select", "date"]),
-  options: PropTypes.object, // Can be a flat or nested object for grouped options
+  options: PropTypes.object, 
   onChange: PropTypes.func,
 };
 

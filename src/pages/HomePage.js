@@ -3,7 +3,7 @@ import Navbar from "../components/Navbar";
 import Dashboard from "../components/Dashboard";
 import Home from "../components/Home";
 import Applications from "../components/Applications";
-import ApplicationView from "../components/ApplicationView";
+import ApplicationView from "../components/ApplicationView/ApplicationView";
 import { useAuth } from "../contexts/AuthProvider";
 
 
@@ -19,7 +19,7 @@ const HomePage = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="/applications/view/:id" element={<ApplicationView isAdmin={isAdmin} />} />
 
-                <Route path="applications/*" element={<Applications />} />
+                <Route path="applications/*" element={<Applications />}/>
             </Routes>
             
         </div>

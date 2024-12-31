@@ -1,0 +1,35 @@
+.claim-btn {
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  
+  .claim-btn:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+  }
+  
+  .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #28a745;
+  }
+  
+  .modal-title {
+    color: #28a745;
+    font-weight: bold;
+  }
+  
+  .modal-footer .btn {
+    font-weight: bold;
+    border-radius: 6px;
+  }
+  
+  .alert-danger {
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+  

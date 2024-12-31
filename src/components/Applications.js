@@ -7,6 +7,7 @@ import applicationService from "../services/applicationService";
 import CSVService from "../services/csvService";
 import "./Applications.css";
 import Application from "../models/Application";
+import Domains from '../assets/data/domains.json';
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -33,6 +34,7 @@ const Applications = () => {
           setApplications(data.applications);
           setTotalPages(data.pagination.totalPages);
           navigate(`/applications/${data.view}`, { replace: true });
+          console.log(data.view);
           setCurrentView(data.view);
         } else {
           const view = location.pathname.split("/").pop();
@@ -53,7 +55,6 @@ const Applications = () => {
       let applications = data.applications;
       let pagination = data.pagination;
       const valid = data.valid;
-      view = data.view;
 
       const apps =  applications.map((app) => new Application(app));
       if (!valid) throw new Error(error);
@@ -69,6 +70,7 @@ const Applications = () => {
   };
 
   const handlePageChange = async (page) => {
+    console.log(currentView)
     await fetchApplications(currentView, page);
   };
 
@@ -150,7 +152,7 @@ const Applications = () => {
           <div className="row mb-3">
             <div className="col-md-8">
               <Filters
-                domainsList={["autorefi.belco.org", "autorefi.cunj.com", "autorefi.regionalfcu.com", "autorefi.ohiovalleycu.org","checking.lubbocknational.com","autorefi.tremontcu.salrefi.com","autorefi.weststar.salrefi.com"]}
+                domainsList={Domains.domains}
                 onSaveFilters={handleApplyFilters}
               />
             </div>

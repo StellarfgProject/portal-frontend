@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import applicationService from "../services/applicationService";
+import applicationService from "../../services/applicationService";
 import "./ApplicationView.css";
 import FormField from "./FormField";
-import HowDidYouHear from "../assets/data/how_did_you_hear.json";
-import States from "../assets/data/states.json";
+import HowDidYouHear from "../../assets/data/how_did_you_hear.json";
+import States from "../../assets/data/states.json";
+import ClaimApplicationModal from "./ClaimApplicationModal";
+import StatusManagement from "./StatusManagement";
 
 const ApplicationView = ({ isAdmin = false }) => {
   
@@ -56,6 +58,14 @@ const ApplicationView = ({ isAdmin = false }) => {
     );
   }
 
+  const handleClaimSuccess = () => {
+    setApplication({ ...application, claimed_by: true });
+  };
+
+  const handleStatusUpdate = (newLogEntry) => {
+    console.log("Status updated:", newLogEntry); // Backend logic can go here
+  };
+
   return (
     
     
@@ -65,16 +75,32 @@ const ApplicationView = ({ isAdmin = false }) => {
         <i className="bi bi-arrow-left"></i> Back to Applications
       </button>
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="page-title">Applicant</h3>
+
+      <div className="mb-4">
         {application.claimed_by ? (
-          <div>
-            <button className="btn btn-warning me-2">Update Status</button>
-            <button className="btn btn-danger">Need Help?</button>
-          </div>
-        ) : (
-          <button className="btn btn-success">Claim This Application</button>
-        )}
+            <div>
+
+              <div className="d-flex"> 
+                <div className="ms-auto">
+                  <button className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent">Update Status</button>
+                </div>
+              </div>
+
+
+              <div className="collapse" id="collapseContent" >
+                <StatusManagement application={application} onStatusUpdate={handleStatusUpdate} />
+              </div>
+
+              
+            </div>
+            
+          ) : (
+            <div className="d-flex"> 
+              <div className="ms-auto">
+                <ClaimApplicationModal guid={application.guid} onClaimSuccess={handleClaimSuccess} />
+              </div>
+            </div>        
+          )}
       </div>
 
 
