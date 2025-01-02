@@ -7,7 +7,13 @@
 .login-page {
   position: relative;
   height: 100vh;
+  animation: slide 15s infinite alternate;
+  background-size: cover;
+  background-position: center;
+  flex-direction: column;
 }
+
+
 
 .overlay {
   position: absolute;
@@ -40,6 +46,12 @@
   height: auto;
 }
 
+.login-button{
+  margin-top: 5%;
+  height: 50px;
+}
+
+
 .otp-inputs {
   gap: 10px;
 }
@@ -61,11 +73,15 @@
 
 /* Footer */
 .footer {
-  position: absolute;
+  position: relative;
+  bottom: unset;
   bottom: 0;
   width: 100%;
   background: #333;
   padding: 1rem 0;
+  margin-top: auto;
+  color: white;
+  height: 15%;
 }
 
 /* Background image slider */
@@ -75,8 +91,5 @@
   100% { background-image: url('./../assets/0_sky-08.jpg'); }
 }
 
-.login-page {
-  animation: slide 15s infinite alternate;
-  background-size: cover;
-  background-position: center;
-}
+
+
