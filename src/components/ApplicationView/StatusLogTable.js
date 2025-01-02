@@ -1,10 +1,9 @@
 import React from "react";
-import "./StatusManagement.css";
+import "./StatusLogTable.css";
 
 const StatusLogTable = ({ logs }) => {
   return (
     <div className="status-log">
-      <h3 className="mt-5 mb-3">Status Log</h3>
       <div className="log-container">
         {logs.length > 0 ? (
           <table className="table table-striped">
@@ -19,10 +18,10 @@ const StatusLogTable = ({ logs }) => {
             <tbody>
               {logs.map((entry, index) => (
                 <tr key={index}>
-                  <td>{entry.timestamp}</td>
-                  <td>{entry.updatedBy}</td>
+                  <td>{entry.ts_formatted}</td>
+                  <td className="text-capitalize">{entry.full_name}</td>
                   <td>{entry.status}</td>
-                  <td>{entry.note || "None"}</td>
+                  <td>{entry.status_note || "None"}</td>
                 </tr>
               ))}
             </tbody>

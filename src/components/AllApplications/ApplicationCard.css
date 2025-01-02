@@ -1,0 +1,98 @@
+/* Prefix: .application-card */
+
+/* Row Styling */
+.application-card {
+  font-family: "Arial", sans-serif;
+  font-size: 14px;
+  color: #333;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.application-card:hover {
+  background-color: #f8f9fa;
+}
+
+/* Action Button */
+.application-card .btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 5px 10px;
+  transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.application-card .btn-success {
+  background: linear-gradient(45deg, #28a745, #218838);
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+}
+
+.application-card .btn-success:hover {
+  background: linear-gradient(45deg, #218838, #1e7e34);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Name Section */
+.application-card .text-uppercase {
+  font-size: 16px;
+  font-weight: 700;
+  color: #007bff;
+}
+
+.application-card .text-muted {
+  font-size: 14px;
+  color: #6c757d;
+}
+
+/* Contact Section */
+.application-card a {
+  color: #0056b3;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.application-card a:hover {
+  color: #003f88;
+  text-decoration: underline;
+}
+
+/* Status Column */
+.application-card .badge {
+  padding: 5px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.application-card .badge.bg-warning {
+  background: linear-gradient(45deg, #ffc107, #fd7e14);
+  color: #212529;
+}
+
+.application-card .badge.bg-warning.text-dark {
+  color: #212529;
+}
+
+.application-card .btn-warning {
+  background: linear-gradient(45deg, #ffc107, #fd7e14);
+  color: #fff;
+  font-weight: bold;
+}
+
+.application-card .btn-warning:hover {
+  background: linear-gradient(45deg, #fd7e14, #e96b00);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+  .application-card td {
+    font-size: 12px;
+  }
+
+  .application-card .btn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+}

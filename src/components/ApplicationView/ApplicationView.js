@@ -6,7 +6,8 @@ import FormField from "./FormField";
 import HowDidYouHear from "../../assets/data/how_did_you_hear.json";
 import States from "../../assets/data/states.json";
 import ClaimApplicationModal from "./ClaimApplicationModal";
-import StatusManagement from "./StatusManagement";
+import StatusLogTable from "./StatusLogTable";
+import StatusForm from "./StatusForm";
 
 const ApplicationView = ({ isAdmin = false }) => {
   
@@ -17,6 +18,22 @@ const ApplicationView = ({ isAdmin = false }) => {
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [logs, setLogs] = useState([]);
+
+  const fetchStatuses = async () => {
+    
+    setError("");
+    try {
+      const result = await applicationService.getStatuses(id);
+      if (result.valid) {
+        setLogs(result.data); // Update logs state with data
+      } else {
+        alert(result.error || "Failed to fetch statuses.");
+      }
+    } catch (err) {
+      alert("An unexpected error occurred while fetching statuses.");
+    } 
+  };
 
   useEffect(() => {
     const fetchApplicationDetails = async () => {
@@ -24,7 +41,6 @@ const ApplicationView = ({ isAdmin = false }) => {
 
       const data = await applicationService.getApplicationById(id);
         
-
       if (!data.valid) {
         setError(error || "Failed to load applications.");
         console.log("Failed to fetch application details:", error);
@@ -38,6 +54,7 @@ const ApplicationView = ({ isAdmin = false }) => {
     fetchApplicationDetails();
     // setIsEditable(isAdmin);
     setIsEditable(false);
+    fetchStatuses();
   }, [id, isAdmin]);
 
   if (loading) {
@@ -62,9 +79,7 @@ const ApplicationView = ({ isAdmin = false }) => {
     setApplication({ ...application, claimed_by: true });
   };
 
-  const handleStatusUpdate = (newLogEntry) => {
-    console.log("Status updated:", newLogEntry); // Backend logic can go here
-  };
+  
 
   return (
     
@@ -88,8 +103,10 @@ const ApplicationView = ({ isAdmin = false }) => {
 
 
               <div className="collapse" id="collapseContent" >
-                <StatusManagement application={application} onStatusUpdate={handleStatusUpdate} />
+                <StatusForm guid={id} onUpdate={fetchStatuses} />
               </div>
+              
+              <StatusLogTable logs={logs} />
 
               
             </div>

@@ -20,23 +20,29 @@ const ClaimApplicationModal = ({ guid, onClaimSuccess }) => {
     setLoading(true);
     setError("");
     try {
-      // await applicationService.claimApplication(guid); // Assuming this is the API call
-      setLoading(false);
-      setShow(false);
-      if (onClaimSuccess) onClaimSuccess(); // Notify parent component about successful claim
+      const result = await applicationService.claimApplication(guid);
+  
+      if (result.valid) {
+        
+        setLoading(false);
+        setShow(false);
+        if (onClaimSuccess) onClaimSuccess(); 
+      } else {
+        
+        setLoading(false);
+        setError(result.error || "Failed to claim the application. Please try again.");
+      }
     } catch (err) {
       setLoading(false);
-      setError("Failed to claim the application. Please try again.");
+      setError("An unexpected error occurred. Please try again.");
     }
   };
+  
 
   return (
     <>
       {/* Claim Button */}
-      <button
-        className="btn btn-success claim-btn"
-        onClick={handleShow}
-      >
+      <button className="btn btn-success claim-btn" onClick={handleShow} >
         Claim This Application
       </button>
 
@@ -52,12 +58,7 @@ const ClaimApplicationModal = ({ guid, onClaimSuccess }) => {
             <div className="modal-content">
               <div className="modal-header">
                 <h5 className="modal-title text-success">Confirm Claim</h5>
-                <button
-                  type="button"
-                  className="close"
-                  aria-label="Close"
-                  onClick={handleClose}
-                >
+                <button type="button" className="close" aria-label="Close" onClick={handleClose} >
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
