@@ -3,10 +3,11 @@ import { useNavigate, useLocation } from "react-router-dom";
 import Filters from "./Filters";
 import Pagination from "./Pagination";
 import ApplicationCard from "./ApplicationCard";
-import applicationService from "../services/applicationService";
-import CSVService from "../services/csvService";
+import applicationService from "../../services/applicationService";
+import CSVService from "../../services/csvService";
 import "./Applications.css";
-import Application from "../models/Application";
+import Application from "../../models/Application";
+import Domains from '../../assets/data/domains.json';
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -33,6 +34,7 @@ const Applications = () => {
           setApplications(data.applications);
           setTotalPages(data.pagination.totalPages);
           navigate(`/applications/${data.view}`, { replace: true });
+          console.log(data.view);
           setCurrentView(data.view);
         } else {
           const view = location.pathname.split("/").pop();
@@ -53,7 +55,6 @@ const Applications = () => {
       let applications = data.applications;
       let pagination = data.pagination;
       const valid = data.valid;
-      view = data.view;
 
       const apps =  applications.map((app) => new Application(app));
       if (!valid) throw new Error(error);
@@ -69,6 +70,7 @@ const Applications = () => {
   };
 
   const handlePageChange = async (page) => {
+    console.log(currentView)
     await fetchApplications(currentView, page);
   };
 
@@ -128,7 +130,7 @@ const Applications = () => {
   };
 
   return (
-    <div className="container mt-4">
+    <div className="applications-container mt-4">
 
       {error ? ( 
         <div className="alert alert-danger" role="alert">
@@ -138,7 +140,7 @@ const Applications = () => {
         <>
           <div className="row mb-4">
             <div className="col-md-6">
-              <h1 className="page-title text-primary">Applications</h1>
+              <h1 className="page-title">Applications</h1>
             </div>
             <div className="col-md-6 text-end">
               <button className="btn btn-success" onClick={handleExportCSV}>
@@ -150,7 +152,7 @@ const Applications = () => {
           <div className="row mb-3">
             <div className="col-md-8">
               <Filters
-                domainsList={["autorefi.belco.org", "autorefi.cunj.com", "autorefi.regionalfcu.com", "autorefi.ohiovalleycu.org","checking.lubbocknational.com","autorefi.tremontcu.salrefi.com","autorefi.weststar.salrefi.com"]}
+                domainsList={Domains.domains}
                 onSaveFilters={handleApplyFilters}
               />
             </div>
@@ -174,10 +176,10 @@ const Applications = () => {
             <table className="table table-striped table-hover">
               <thead className="table-light">
                 <tr>
-                  <th>Action</th>
-                  <th>Name / City, State</th>
-                  <th>Phone / Email</th>
-                  <th>Submitted At (Eastern) / Domain</th>
+                  <th></th>
+                  <th>Name /<br /> City, State</th>
+                  <th>Phone /<br /> Email</th>
+                  <th>Submitted At (EST) /<br /> Domain</th>
                   <th>Updated By</th>
                   <th>Status</th>
                 </tr>

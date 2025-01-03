@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import applicationService from "../services/applicationService";
+import applicationService from "../../services/applicationService";
 import "./ApplicationView.css";
 import FormField from "./FormField";
-import HowDidYouHear from "../assets/data/how_did_you_hear.json";
-import States from "../assets/data/states.json";
+import HowDidYouHear from "../../assets/data/how_did_you_hear.json";
+import States from "../../assets/data/states.json";
+import ClaimApplicationModal from "./ClaimApplicationModal";
+import StatusLogTable from "./StatusLogTable";
+import StatusForm from "./StatusForm";
 
 const ApplicationView = ({ isAdmin = false }) => {
   
@@ -15,6 +18,22 @@ const ApplicationView = ({ isAdmin = false }) => {
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [logs, setLogs] = useState([]);
+
+  const fetchStatuses = async () => {
+    
+    setError("");
+    try {
+      const result = await applicationService.getStatuses(id);
+      if (result.valid) {
+        setLogs(result.data); // Update logs state with data
+      } else {
+        alert(result.error || "Failed to fetch statuses.");
+      }
+    } catch (err) {
+      alert("An unexpected error occurred while fetching statuses.");
+    } 
+  };
 
   useEffect(() => {
     const fetchApplicationDetails = async () => {
@@ -22,7 +41,6 @@ const ApplicationView = ({ isAdmin = false }) => {
 
       const data = await applicationService.getApplicationById(id);
         
-
       if (!data.valid) {
         setError(error || "Failed to load applications.");
         console.log("Failed to fetch application details:", error);
@@ -36,6 +54,7 @@ const ApplicationView = ({ isAdmin = false }) => {
     fetchApplicationDetails();
     // setIsEditable(isAdmin);
     setIsEditable(false);
+    fetchStatuses();
   }, [id, isAdmin]);
 
   if (loading) {
@@ -56,6 +75,12 @@ const ApplicationView = ({ isAdmin = false }) => {
     );
   }
 
+  const handleClaimSuccess = () => {
+    setApplication({ ...application, claimed_by: true });
+  };
+
+  
+
   return (
     
     
@@ -65,16 +90,34 @@ const ApplicationView = ({ isAdmin = false }) => {
         <i className="bi bi-arrow-left"></i> Back to Applications
       </button>
 
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3 className="page-title">Applicant</h3>
+
+      <div className="mb-4">
         {application.claimed_by ? (
-          <div>
-            <button className="btn btn-warning me-2">Update Status</button>
-            <button className="btn btn-danger">Need Help?</button>
-          </div>
-        ) : (
-          <button className="btn btn-success">Claim This Application</button>
-        )}
+            <div>
+
+              <div className="d-flex"> 
+                <div className="ms-auto">
+                  <button className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent">Update Status</button>
+                </div>
+              </div>
+
+
+              <div className="collapse" id="collapseContent" >
+                <StatusForm guid={id} onUpdate={fetchStatuses} />
+              </div>
+              
+              <StatusLogTable logs={logs} />
+
+              
+            </div>
+            
+          ) : (
+            <div className="d-flex"> 
+              <div className="ms-auto">
+                <ClaimApplicationModal guid={application.guid} onClaimSuccess={handleClaimSuccess} />
+              </div>
+            </div>        
+          )}
       </div>
 
       <div>
