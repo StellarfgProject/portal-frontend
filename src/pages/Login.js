@@ -80,7 +80,7 @@ const Login = () => {
         <div className="login-box">
           <div className="text-center mb-4">
             <img src="/logo.png" alt="Logo" className="logo-img" />
-            <h2 className="mt-2">Welcome Back</h2>
+            {/* <h2 className="mt-2">Welcome Back</h2> */}
           </div>
 
           {message && <div className="alert alert-success">{message}</div>}
@@ -89,7 +89,7 @@ const Login = () => {
           {step === 1 && (
             <form onSubmit={handleLogin}>
               <div className="mb-3">
-                <label htmlFor="email" className="form-label">Email address</label>
+                <label htmlFor="email" className="form-label">User Name</label>
                 <input
                   type="email"
                   className="form-control"
@@ -110,7 +110,7 @@ const Login = () => {
                   required
                 />
               </div>
-              <button type="submit" className="btn btn-primary w-100">Login</button>
+              <button type="submit" className="btn btn-primary w-100 login-button">Login</button>
             </form>
           )}
 

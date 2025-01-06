@@ -13,16 +13,8 @@ const formatValue = (value, type) => {
   return value;
 };
 
-const FormField = ({
-  name,
-  value,
-  iseditable = false,
-  type = "text",
-  options = {},
-  onChange,
-}) => {
-  // Helper function to format the date
-   
+const FormField = ({  name,  value,  iseditable = false,  type = "text",  options = {},  onChange,}) => {
+    
 
   // Move formatValue into the initialization logic
   const [isEditing, setIsEditing] = useState(false);
@@ -75,27 +67,11 @@ const FormField = ({
         {isEditing ? (
           <>
             {type === "select" ? (
-              <select
-                className="form-control form-control-lg me-2"
-                value={currentValue}
-                onChange={(e) => setCurrentValue(e.target.value)}
-              >
-                {renderSelectOptions()}
-              </select>
+              <select className="form-control form-control-lg me-2" value={currentValue} onChange={(e) => setCurrentValue(e.target.value)}> {renderSelectOptions()} </select>
             ) : type === "date" ? (
-              <input
-                type="date"
-                className="form-control form-control-lg me-2"
-                value={currentValue}
-                onChange={handleDateChange}
-              />
+              <input type="date" className="form-control form-control-lg me-2" value={currentValue} onChange={handleDateChange}/>
             ) : (
-              <input
-                type={type}
-                className="form-control form-control-lg me-2"
-                value={currentValue}
-                onChange={(e) => setCurrentValue(e.target.value)}
-              />
+              <input type={type} className="form-control form-control-lg me-2" value={currentValue} onChange={(e) => setCurrentValue(e.target.value)}/>
             )}
             <button type="button" className="btn btn-success btn-sm" onClick={handleSave}>
               <i className="bi bi-check-circle-fill"></i>

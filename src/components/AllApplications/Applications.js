@@ -17,6 +17,11 @@ const Applications = () => {
   const [currentView, setCurrentView] = useState("");
   const [pageSize] = useState(10);
   const [error, setError] = useState(null); 
+  const [loading, setLoading] = useState(false);
+  const authToken = localStorage.getItem("authToken"); // Or use a context/store
+  const userEmail = localStorage.getItem("userEmail"); // Or use a context/store
+
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -92,18 +97,45 @@ const Applications = () => {
       setError(err.message || "Failed to apply filters.");
     }
   };
-
+  
   const handleSearch = () => {
-    setError(null); // Reset error state
-    const searchResults = applications.filter((app) =>
-      `${app.first_name} ${app.last_name}`
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-    setApplications(searchResults);
-    setCurrentPage(1);
+    setError(null); 
+    setLoading(true); 
+  
+    try {
+      const trimmedQuery = searchQuery.trim().toLowerCase();
+      if (!trimmedQuery) {
+        setError("Please enter a valid search query.");
+        setLoading(false);
+        return;
+      }
+  
+      const filteredApplications = applications.filter((app) =>
+        app.guid.toLowerCase().includes(trimmedQuery)
+      );
+  
+      if (filteredApplications.length === 0) {
+        setError("No matching applications found.");
+      } else {
+        const remainingApplications = applications.filter(
+          (app) =>
+            !filteredApplications.some(
+              (filteredApp) => filteredApp.guid === app.guid
+            )
+        );
+  
+        
+        setApplications([...filteredApplications, ...remainingApplications]);
+        setCurrentPage(1); 
+      }
+    } catch (err) {
+      setError("An error occurred while searching applications.");
+      console.error("Search error:", err);
+    } finally {
+      setLoading(false); 
+    }
   };
-
+   
   const handleExportCSV = () => {
     const headers = [
       "First Name",

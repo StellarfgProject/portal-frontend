@@ -14,8 +14,8 @@ const HomePage = () => {
     const {auth} = useAuth();
     const isAdmin = auth.role.toLowerCase() === "admin";
     const user = {
-        firstName: "Rohith",
-        lastName: "Kankipati",
+        firstName: "Meenakshi",
+        lastName: "Desu",
         role: "Admin"
     }
     return (

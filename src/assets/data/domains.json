@@ -2,10 +2,28 @@
     "domains" : [
         "autorefi.belco.org",
         "autorefi.cunj.com",
+        "autorefi.scucu.com",
         "autorefi.regionalfcu.com",
         "autorefi.ohiovalleycu.org",
         "checking.lubbocknational.com",
         "autorefi.tremontcu.salrefi.com",
-        "autorefi.weststar.salrefi.com"
+        "autorefi.weststar.salrefi.com",
+        "autorefi.dfdcu.salrefi.com",
+        "autorefi.cunj.salrefi.com",
+        "autorefi.ohiovalleycu.salrefi.com",
+        "autorefi.regionalfcu.org",
+        "autorefi.myrivervalleycu.org",
+        "autorefi.cuwest.org",
+        "transcendcu.salrefi.com",
+        "nymeo.salrefi.com",
+        "traxcu.salrefi.com",        
+        "shorelinecu.salrefi.com",
+        "autorefi.oecu.com",
+        "mecuanywhere.salrefi.com",
+        "autorefi.lubbocknational.salrefi.com",
+        "homeequity.belco.org",
+        "autorefi.anb.salrefi.com",
+        "localhost",
+        "127.0.0.1"
     ]
 }

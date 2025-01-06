@@ -87,26 +87,42 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
         </div>
 
         {/* Domains */}
-        <div className="mb-3">
+    
+      <div className="mb-3">
         <label className="form-label fw-bold">Domains</label>
         <div className="form-check mb-1 d-flex align-items-center">
-          <input className="form-check-input" type="checkbox" id="selectAllDomains" checked={domainsList.length > 0 && filters.domains.length === domainsList.length} onChange={(e) => handleToggleAllDomains(e.target.checked)} />
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="selectAllDomains"
+            checked={domainsList.length > 0 && filters.domains.length === domainsList.length}
+            onChange={(e) => handleToggleAllDomains(e.target.checked)}
+          />
           <label className="form-check-label ms-2" htmlFor="selectAllDomains"> Select All </label>
         </div>
-        {domainsList.map((domain, idx) => (
-          <div key={idx} className="form-check mb-1 d-flex align-items-center">
-            <input className="form-check-input" type="checkbox" id={`domain-${idx}`} checked={filters.domains.includes(domain)}
-              onChange={(e) => {
-                const updatedDomains = e.target.checked
-                  ? [...filters.domains, domain]
-                  : filters.domains.filter((d) => d !== domain);
-                setFilters({ ...filters, domains: updatedDomains });
-              }}
-            />
-            <label className="form-check-label ms-2" htmlFor={`domain-${idx}`}>{domain}</label>
-          </div>
-        ))}
+
+        {/* Add scrollable container for domains */}
+        <div style={{ maxHeight: '150px', overflowY: 'auto', border: '1px solid #ddd', padding: '5px', borderRadius: '4px' }}>
+          {domainsList.map((domain, idx) => (
+            <div key={idx} className="form-check mb-1 d-flex align-items-center">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id={`domain-${idx}`}
+                checked={filters.domains.includes(domain)}
+                onChange={(e) => {
+                  const updatedDomains = e.target.checked
+                    ? [...filters.domains, domain]
+                    : filters.domains.filter((d) => d !== domain);
+                  setFilters({ ...filters, domains: updatedDomains });
+                }}
+              />
+              <label className="form-check-label ms-2" htmlFor={`domain-${idx}`}>{domain}</label>
+            </div>
+          ))}
         </div>
+      </div>
+
    
         <div className="d-flex justify-content-between">
           <button className="btn btn-secondary" onClick={handleCancel}>
