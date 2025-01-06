@@ -8,7 +8,6 @@ import States from "../../assets/data/states.json";
 import ClaimApplicationModal from "./ClaimApplicationModal";
 import StatusLogTable from "./StatusLogTable";
 import StatusForm from "./StatusForm";
-import handleExportCSV from "../../services/csvService";
 
 const ApplicationView = ({ isAdmin = false }) => {
   
@@ -80,6 +79,35 @@ const ApplicationView = ({ isAdmin = false }) => {
     setApplication({ ...application, claimed_by: true });
   };
 
+  const handleDownloadCSV = () => {
+    if (!application) {
+      alert("No application data available for download.");
+      return;
+    }
+  
+    // Prepare the header row and single data row
+    const headers = Object.keys(application); 
+    const values = Object.values(application); 
+  
+    // Create CSV content
+    const csvData = [headers, values]; 
+  
+    // Convert to CSV string
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      csvData.map((row) => row.join(",")).join("\n");
+  
+    // Create a downloadable link
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "application_data.csv");
+  
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
   
 
   return (
@@ -118,7 +146,7 @@ const ApplicationView = ({ isAdmin = false }) => {
 
           {/* CSV Export Button */}
           <div className="mt-3 d-flex justify-content-end">
-            <button className="btn btn-success" onClick={handleExportCSV}> <i className="bi bi-download"></i></button>
+            <button className="btn btn-success"  onClick={handleDownloadCSV}> <i className="bi bi-download"></i></button>
           </div>
         </div>
 
