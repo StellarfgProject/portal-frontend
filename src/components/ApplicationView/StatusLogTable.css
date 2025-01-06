@@ -1,0 +1,162 @@
+.status-log {
+    margin-top: 20px;
+  }
+  
+  /* Container Styling */
+  .status-log {
+    font-family: 'Arial', sans-serif;
+    margin: 20px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+  
+  .status-log .log-container {
+    padding: 15px;
+    border: 1px solid #e1e1e1;
+    border-radius: 8px;
+    background: #fff;
+  }
+  
+  /* Table Styling */
+  .status-log .table {
+    margin: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+  }
+  
+  /* Gradient header with vibrant colors */
+  .status-log .table thead {
+    background: linear-gradient(45deg, #6a11cb, #2575fc);
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 16px;
+  }
+  
+  .status-log .table thead th {
+    text-align: center;
+    padding: 12px 15px;
+    border-bottom: 2px solid #ddd;
+  }
+  
+  /* Stylish rows with hover effects */
+  .status-log .table tbody tr {
+    transition: background-color 0.2s, transform 0.2s;
+  }
+  
+  .status-log .table tbody tr:hover {
+    background-color: #f0f8ff;
+    transform: scale(1.02);
+  }
+  
+  /* Add zebra-striping */
+  .status-log .table-striped tbody tr:nth-of-type(odd) {
+    background-color: #f7f7f7;
+  }
+  
+  /* Table cells */
+  .status-log .table td {
+    text-align: center;
+    vertical-align: middle;
+    padding: 10px 15px;
+    font-size: 15px;
+    border-bottom: 1px solid #ddd;
+    max-width: 600px;
+  }
+  
+  /* Status badges for Status column */
+  .status-log .table td:nth-child(3) {
+    font-weight: bold;
+  }
+  
+  /* Notes column fallback for "None" */
+  .status-log .table td:nth-child(4) {
+    font-style: italic;
+    color: #999;
+  }
+  
+  /* Custom Styling for Empty State */
+  .status-log .text-muted {
+    font-size: 16px;
+    text-align: center;
+    margin-top: 20px;
+    color: #888;
+  }
+  
+/* Responsive Table for Small Screens */
+@media screen and (max-width: 768px) {
+    .status-log .table thead {
+      display: none; /* Hide table header on smaller screens */
+    }
+  
+    .status-log .table,
+    .status-log .table tbody,
+    .status-log .table tr,
+    .status-log .table td {
+      display: block;
+      width: 100%;
+    }
+  
+    .status-log .table tbody tr {
+      margin-bottom: 15px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 10px; /* Add padding around each row */
+      background: #fff; /* Ensure background is white */
+    }
+  
+    .status-log .table td {
+      text-align: left; /* Align text to the left */
+      padding: 8px 0;
+      border-bottom: none;
+      position: relative;
+      display: flex; /* Stack label and value */
+      flex-direction: column; /* Ensure label is above the value */
+    }
+  
+    .status-log .table td:before {
+      content: attr(data-label); /* Display label */
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #333;
+      margin-bottom: 4px; /* Add space between label and value */
+    }
+  
+    .status-log .table td:nth-child(1):before {
+      content: "Timestamp:";
+    }
+  
+    .status-log .table td:nth-child(2):before {
+      content: "Updated By:";
+    }
+  
+    .status-log .table td:nth-child(3):before {
+      content: "Status:";
+    }
+  
+    .status-log .table td:nth-child(4):before {
+      content: "Notes:";
+    }
+  
+    .status-log .table tbody tr:last-child {
+      margin-bottom: 0; /* Remove bottom margin for the last row */
+    }
+  }
+  
+  
+  /* Footer Table Message */
+  .status-log .table tfoot {
+    background: #6a11cb;
+    color: white;
+    text-align: center;
+    font-size: 12px;
+  }
+  
+  .status-log .table tfoot td {
+    padding: 10px;
+    border-top: 1px solid #ddd;
+  }
+  

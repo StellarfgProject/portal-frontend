@@ -30,7 +30,7 @@ const Navbar = ({ isAdmin }) => {
                 </li>
 
                 {/* Tickets Dropdown */}
-                <li className="nav-item dropdown">
+                {/* <li className="nav-item dropdown">
                   <a className="nav-link dropdown-toggle" href="#tickets" id="ticketsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     Tickets
                   </a>
@@ -39,7 +39,7 @@ const Navbar = ({ isAdmin }) => {
                     <li><a className="dropdown-item" href="/tickets/raise">Raise</a></li>
                     <li><a className="dropdown-item" href="/tickets/update">Update</a></li>
                   </ul>
-                </li>
+                </li> */}
 
                 {/* Admin (Conditional) */}
                 {isAdmin && (
@@ -64,7 +64,7 @@ const Navbar = ({ isAdmin }) => {
               </button>
 
                 {/* Notifications */}
-                <li className="nav-item me-3">
+                {/* <li className="nav-item me-3">
                   <a className="nav-link position-relative" href="/notifications">
                     <i className="bi bi-bell-fill icon"></i>
                     <span className="position-absolute top-30 start-100 translate-middle badge rounded-pill bg-danger">
@@ -72,7 +72,7 @@ const Navbar = ({ isAdmin }) => {
                       <span className="visually-hidden">unread messages</span>
                     </span>
                   </a>
-                </li>
+                </li> */}
 
                 {/* Profile */}
                 <li className="nav-item dropdown profile-li">
