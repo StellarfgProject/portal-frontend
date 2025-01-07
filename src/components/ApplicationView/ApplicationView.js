@@ -113,7 +113,7 @@ const ApplicationView = ({ isAdmin = false }) => {
   return (
     
     
-    <div className="container mt-3 application-view">
+    <div className="container application-view">
       
       <button className="btn btn-outline-secondary mb-4" onClick={() => navigate("/applications")}>
         <i className="bi bi-arrow-left"></i> Back to Applications

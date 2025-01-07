@@ -1,0 +1,25 @@
+/* HomePage container */
+.homePage {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: relative;
+  }
+  
+  /* Navbar fixed to the top */
+  .homePage > :first-child {
+    position: fixed; /* Keeps the navbar fixed at the top */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it stays above the content */
+  }
+  
+  /* Content starts below the navbar */
+  .homePageContent {
+    padding-top: 76px; /* Match this value to the height of the navbar */
+    flex-grow: 1;
+    overflow-y: auto; /* Enable scrolling for overflow content */
+    background-color: #f8f9fa; /* Optional: Background color for content */
+  }
+  

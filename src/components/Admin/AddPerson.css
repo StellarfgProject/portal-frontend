@@ -1,0 +1,21 @@
+/* AddPerson.css */
+.add-person {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+  }
+  
+  .add-person .btn {
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #007bff;
+    color: #fff;
+    transition: background-color 0.3s ease;
+  }
+  
+  .add-person .btn:hover {
+    background-color: #0056b3;
+  }
+  

@@ -4,7 +4,7 @@ import logo from "../assets/logo.png";
 
 const Navbar = ({ isAdmin }) => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-teal">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-teal fixed-top">
       <div className="container">
         
         {/* Logo */}

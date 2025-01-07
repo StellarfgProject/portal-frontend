@@ -1,22 +1,26 @@
-.form-section {
+.application-view {
+  margin-top: 100px;
+}
+
+.application-view .form-section {
   background-color: #fff;
   padding: 10px 20px; /* Top/Bottom: 10px, Left/Right: 20px */
   color: black;
 }
 
-.section-title {
+.application-view .section-title {
   font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 20px;
 }
 
-.form-label {
+.application-view .form-label {
   font-weight: 500;
   margin-bottom: 5px;
   display: block;
 }
 
-.form-group {
+.application-view .form-group {
   margin-bottom: 1rem;
   width: 100%; /* Adjust width to align two fields in a row */
   margin-left: 0; /* Align to the left */
@@ -25,14 +29,14 @@
   vertical-align: top;
 }
 
-.form-group.short-width {
+.application-view .form-group.short-width {
   width: 100%; /* Reduced width for specific fields */
   max-width: 100px; /* Limit maximum width */
   margin-left: auto;
   margin-right: auto; /* Center align smaller fields */
 }
 
-.form-control {
+.application-view .form-control {
   border: 1px solid #ced4da;
   border-radius: 4px;
   padding: 10px; /* Adjust padding inside the fields */
@@ -40,17 +44,17 @@
   width: 100%; /* Ensure input fields take the full width of their container */
 }
 
-input[readonly] {
+.application-view input[readonly] {
   background-color: #e9ecef;
   cursor: not-allowed;
 }
 
-select.form-control {
+.application-view select.form-control {
   background-color: #fff;
   cursor: pointer;
 }
 
-.row {
+.application-view .row {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between; 

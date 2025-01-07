@@ -1,0 +1,15 @@
+/* AllDomains.css */
+.all-domains {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .all-domains .btn-primary {
+    margin-bottom: 20px;
+    border-radius: 50px;
+  }
+  
+  .all-domains .row {
+    gap: 20px;
+  }
+  

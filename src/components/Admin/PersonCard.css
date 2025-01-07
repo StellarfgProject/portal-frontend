@@ -1,0 +1,25 @@
+/* PersonCard.css */
+.person-card {
+    border-radius: 15px;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+  }
+  
+  .person-card:hover {
+    transform: scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .person-card .avatar {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+  
+  .person-card .ml-3 {
+    margin-left: 1rem;
+  }
+  
