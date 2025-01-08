@@ -85,17 +85,36 @@ const ApplicationView = ({ isAdmin = false }) => {
       return;
     }
   
-    // Prepare the header row and single data row
-    const headers = Object.keys(application); 
-    const values = Object.values(application); 
+    // Function to flatten nested objects
+    const flattenObject = (obj, parentKey = "", result = {}) => {
+      for (const key in obj) {
+        if (Object.hasOwnProperty.call(obj, key)) {
+          const newKey = parentKey ? `${parentKey}.${key}` : key;
+          if (typeof obj[key] === "object" && obj[key] !== null) {
+            flattenObject(obj[key], newKey, result);
+          } else {
+            // Assign value or null if undefined
+            result[newKey] = obj[key] !== undefined ? obj[key] : null;
+          }
+        }
+      }
+      return result;
+    };
+  
+    // Flatten the application object to handle nested structures
+    const flattenedApplication = flattenObject(application);
+  
+    // Prepare headers and values
+    const headers = Object.keys(flattenedApplication);
+    const values = Object.values(flattenedApplication).map(value =>
+      value !== null ? value : "null"
+    ); // Represent null values explicitly as "null"
   
     // Create CSV content
-    const csvData = [headers, values]; 
-  
-    // Convert to CSV string
+    const csvData = [headers, values];
     const csvContent =
       "data:text/csv;charset=utf-8," +
-      csvData.map((row) => row.join(",")).join("\n");
+      csvData.map((row) => row.map((val) => `"${val}"`).join(",")).join("\n");
   
     // Create a downloadable link
     const encodedUri = encodeURI(csvContent);
@@ -108,6 +127,7 @@ const ApplicationView = ({ isAdmin = false }) => {
     link.click();
     document.body.removeChild(link);
   };
+  
   
 
   return (
@@ -369,7 +389,7 @@ const ApplicationView = ({ isAdmin = false }) => {
                 <FormField name="Make" value={application.make} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, make: newValue })}/>
               </div>
               <div className="col-md-6">
-                <FormField name="Model" value={application.model} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, model: newValue })}/>
+                <FormField name="Model" value={application.model_year} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, model_year: newValue })}/>
               </div>
             </div>
 
@@ -644,7 +664,7 @@ const ApplicationView = ({ isAdmin = false }) => {
 
             <div className="row">
               <div className="col-md-6">
-                <FormField name="Employment Status" value={application.co_borrower_employement_status} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, co_borrower_employement_status: newValue })}/>
+                <FormField name="Employment Status" value={application.co_borrower_employment_status} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, co_borrower_employment_status: newValue })}/>
               </div>
             </div>
 
