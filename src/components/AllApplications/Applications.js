@@ -11,40 +11,45 @@ import Domains from '../../assets/data/domains.json';
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
+  const [domains, setDomains] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState({
+    applicationType: "all",
+    status: "",
+    dateRange: { start: "", end: "" },
+    domains: domains,
+  });
   const [currentView, setCurrentView] = useState("");
   const [pageSize] = useState(10);
   const [error, setError] = useState(null); 
   const [loading, setLoading] = useState(false);
-  const authToken = localStorage.getItem("authToken"); // Or use a context/store
-  const userEmail = localStorage.getItem("userEmail"); // Or use a context/store
-
-
 
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const initialize = async () => {
-      setError(null); // Reset error state
+      setError(null); 
       try {
         if (location.pathname === "/applications") {
+          
           const data = await applicationService.getDefault();
-          
-          
-          if (!data.valid) throw new Error(error);
+          if (!data.valid) throw new Error(data.error);
 
-          setApplications(data.applications);
-          setTotalPages(data.pagination.totalPages);
           navigate(`/applications/${data.view}`, { replace: true });
-          console.log(data.view);
-          setCurrentView(data.view);
+
         } else {
           const view = location.pathname.split("/").pop();
           await fetchApplications(view, 1);
         }
+
+        const domainsData = await applicationService.getDomains();
+        if (!domainsData.valid) throw new Error(domainsData.error);
+
+        setDomains(domainsData.data.domains);
+
       } catch (err) {
         setError(err.message || "Failed to load applications.");
       }
@@ -52,16 +57,14 @@ const Applications = () => {
     initialize();
   }, [location.pathname]);
 
-  const fetchApplications = async (view, pageIndex) => {
-    setError(null); // Reset error state
+  const fetchApplications = async (view, pageIndex, searchTerm = searchQuery, appliedFilters = filters) => {
+    setError(null);
+    setLoading(true);
     try {
-      const data = await applicationService.getByView( view, pageSize,  pageIndex - 1);
       
-      let applications = data.applications;
-      let pagination = data.pagination;
-      const valid = data.valid;
-
+      const { applications, pagination, valid, error } = await applicationService.getByView( view, pageSize,  pageIndex - 1, searchTerm, appliedFilters);
       const apps =  applications.map((app) => new Application(app));
+
       if (!valid) throw new Error(error);
 
       setApplications(apps);
@@ -71,82 +74,26 @@ const Applications = () => {
     } catch (err) {
       console.log(err)
       setError(err.message || "Failed to load applications.");
+    } finally {
+      setLoading(false)
     }
   };
 
   const handlePageChange = async (page) => {
-    console.log(currentView)
     await fetchApplications(currentView, page);
   };
 
-  const handleApplyFilters = async (filters) => {
-    setError(null); // Reset error state
-    try {
-      const { applications, pagination, valid, error } = await applicationService.getByView(
-        currentView,
-        pageSize,
-        0,
-        filters
-      );
-      if (!valid) throw new Error(error);
-
-      setApplications(applications);
-      setTotalPages(pagination.totalPages);
-      setCurrentPage(1);
-    } catch (err) {
-      setError(err.message || "Failed to apply filters.");
-    }
+  const handleSearch = async () => {
+    await fetchApplications(currentView, 1);
   };
-  
-  const handleSearch = () => {
-    setError(null); 
-    setLoading(true); 
-  
-    try {
-      const trimmedQuery = searchQuery.trim().toLowerCase();
-      if (!trimmedQuery) {
-        setError("Please enter a valid search query.");
-        setLoading(false);
-        return;
-      }
-  
-      const filteredApplications = applications.filter((app) =>
-        app.guid.toLowerCase().includes(trimmedQuery)
-      );
-  
-      if (filteredApplications.length === 0) {
-        setError("No matching applications found.");
-      } else {
-        const remainingApplications = applications.filter(
-          (app) =>
-            !filteredApplications.some(
-              (filteredApp) => filteredApp.guid === app.guid
-            )
-        );
-  
-        
-        setApplications([...filteredApplications, ...remainingApplications]);
-        setCurrentPage(1); 
-      }
-    } catch (err) {
-      setError("An error occurred while searching applications.");
-      console.error("Search error:", err);
-    } finally {
-      setLoading(false); 
-    }
+
+  const handleApplyFilters = async (newFilters) => {
+    setFilters(newFilters); // Update filters state
+    await fetchApplications(currentView, 1, searchQuery, newFilters);
   };
    
   const handleExportCSV = () => {
-    const headers = [
-      "First Name",
-      "Last Name",
-      "City",
-      "State",
-      "Email",
-      "Submitted At",
-      "Domain",
-      "Status",
-    ];
+    const headers = [ "First Name", "Last Name", "City", "State", "Email", "Submitted At", "Domain",  "Status"];
     const data = applications.map((app) => ({
       "First Name": app.first_name,
       "Last Name": app.last_name,
@@ -183,20 +130,11 @@ const Applications = () => {
 
           <div className="row mb-3">
             <div className="col-md-8">
-              <Filters
-                domainsList={Domains.domains}
-                onSaveFilters={handleApplyFilters}
-              />
+              <Filters domainsList={domains} onSaveFilters={handleApplyFilters} />
             </div>
             <div className="col-md-4">
               <div className="input-group">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search applications..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <input type="text" className="form-control" placeholder="Search applications..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                 <button className="btn btn-primary" onClick={handleSearch}>
                   <i className="bi bi-search"></i> Search
                 </button>
@@ -218,18 +156,14 @@ const Applications = () => {
               </thead>
               <tbody>
                 {applications.map((app) => (
-                  <ApplicationCard key={app.guid} application={app} />
+                  <ApplicationCard key={app.guid} application={app} view= {currentView}/>
                 ))}
               </tbody>
             </table>
           </div>
 
           <div className="d-flex justify-content-center mt-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={handlePageChange}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
           </div>
         </>
        )} 

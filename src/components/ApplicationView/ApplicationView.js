@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import applicationService from "../../services/applicationService";
 import "./ApplicationView.css";
 import FormField from "./FormField";
@@ -8,17 +8,21 @@ import States from "../../assets/data/states.json";
 import ClaimApplicationModal from "./ClaimApplicationModal";
 import StatusLogTable from "./StatusLogTable";
 import StatusForm from "./StatusForm";
+import VehicleLoanSection from "./VehicleLoanSection";
 
 const ApplicationView = ({ isAdmin = false }) => {
   
   
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [application, setApplication] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
+
+  const view = searchParams.get("view");
 
   const fetchStatuses = async () => {
     
@@ -36,25 +40,28 @@ const ApplicationView = ({ isAdmin = false }) => {
   };
 
   useEffect(() => {
+
     const fetchApplicationDetails = async () => {
       setLoading(true);
-
-      const data = await applicationService.getApplicationById(id);
-        
-      if (!data.valid) {
-        setError(error || "Failed to load applications.");
-        console.log("Failed to fetch application details:", error);
+      try {
+        const result = await applicationService.getApplicationById(id, view);
+        if (result.valid) {
+          
+          setApplication(result);
+        } else {
+          setError("Failed to load application details.");
+        }
+      } catch (err) {
+        setError("An unexpected error occurred.");
       }
-
-      setApplication(data);
       setLoading(false);
-
     };
+    
 
     fetchApplicationDetails();
     // setIsEditable(isAdmin);
     setIsEditable(false);
-    fetchStatuses();
+    if(view != 'incomplete')fetchStatuses();
   }, [id, isAdmin]);
 
   if (loading) {
@@ -108,6 +115,13 @@ const ApplicationView = ({ isAdmin = false }) => {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleUpdate = (field, value, index, type) => {
+    const updatedItems = [...application[type]]; // Clone the array (vehicles or loans)
+    updatedItems[index][field] = value; // Update the specific field
+    setApplication({ ...application, [type]: updatedItems }); // Update the application state
+  };
+  
   
 
   return (
@@ -121,20 +135,24 @@ const ApplicationView = ({ isAdmin = false }) => {
 
 
       <div className="mb-4">
-      {application.claimed_by ? (
+      
+      {view !== "incomplete" && (
         <div>
-          <div className="d-flex">
-            <div className="ms-auto">
-              <button
-                className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent">Update Status</button>
-            </div>
-          </div>
+          {application.claimed_by ? (
+            <div>
+              <div className="d-flex">
+                <div className="ms-auto">
+                  <button className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent" >
+                    Update Status
+                  </button>
+                </div>
+              </div>
 
-          <div className="collapse" id="collapseContent">
-            <StatusForm guid={id} onUpdate={fetchStatuses} />
-          </div>
+              <div className="collapse" id="collapseContent">
+                <StatusForm guid={id} onUpdate={fetchStatuses} />
+              </div>
 
-            <StatusLogTable logs={logs} />
+              <StatusLogTable logs={logs} />
             </div>
           ) : (
             <div className="d-flex">
@@ -143,6 +161,9 @@ const ApplicationView = ({ isAdmin = false }) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
 
           {/* CSV Export Button */}
           <div className="mt-3 d-flex justify-content-end">
@@ -356,121 +377,9 @@ const ApplicationView = ({ isAdmin = false }) => {
 
         </div>
 
-        {/* Vehicle */}
-        <div className="form-section mb-4">
-          <h5 className="section-title">Vehicle</h5>
-          <div className="row">
-              <div className="col-md-6">
-                <FormField name="VIN (Vehicle Identification Number)" value={application.vin} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, vin: newValue })}/>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Make" value={application.make} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, make: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Model" value={application.model} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, model: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Year" value={application.year} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, year: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Mileage" value={application.mileage} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, mileage: newValue })}/>
-              </div>
-            </div>      
-        </div>
+        <VehicleLoanSection vehicles={application.vehicles} loans={application.current_loans} isEditable={isEditable} onUpdate={handleUpdate}/>
 
 
-        {/* current loan */}
-        <div className="form-section mb-4">
-            <h5 className="section-title">Current Loan</h5>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Monthly Payment" value={application.current_monthly_payment} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_monthly_payment: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Remaining loan/payoff amount" value={application.current_payoff} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_payoff: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Remaining term" value={application.current_remaining_term} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_remaining_term: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Lien holder" value={application.lien_holder} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, lien_holder: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Next Payment Date" value={application.next_payment_date} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, next_payment_date: newValue })}/>
-              </div>
-              </div>
-        </div>
-
-
-
-         {/* Vehicle - 2 */}
-         <div className="form-section mb-4">
-          <h5 className="section-title">Vehicle - 2</h5>
-          <div className="row">
-              <div className="col-md-6">
-                <FormField name="VIN (Vehicle Identification Number)" value={application.vin_number_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, vin_number_2: newValue })}/>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Make" value={application.make_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, make_2: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Model" value={application.model_22} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, model_2: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Year" value={application.year_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, year_2: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Mileage" value={application.mileage_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, mileage_2: newValue })}/>
-              </div>
-            </div>   
-        </div>
-
-
-         {/* current loan */}
-         <div className="form-section mb-4">
-            <h5 className="section-title">Current Loan - 2</h5>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Monthly Payment" value={application.current_monthly_payment_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_monthly_payment_2: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Remaining loan/payoff amount" value={application.current_payoff_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_payoff_2: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Remaining term" value={application.current_remaining_term_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, current_remaining_term_2: newValue })}/>
-              </div>
-              <div className="col-md-6">
-                <FormField name="Lien holder" value={application.lien_holder_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, lien_holder_2: newValue })}/>
-              </div>
-            </div>
-
-            <div className="row">
-              <div className="col-md-6">
-                <FormField name="Next Payment Date" value={application.next_payment_date_2} iseditable={isEditable } onChange={(newValue) => setApplication({ ...application, next_payment_date_2: newValue })}/>
-              </div>
-              </div>
-        </div>
         
         {/* employment */}
         <div className="form-section mb-4">

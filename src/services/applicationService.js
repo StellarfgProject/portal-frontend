@@ -16,30 +16,32 @@ const applicationService = {
     }
   },
 
-  getByView: async (view, pageSize, pageIndex, filters = {}) => {
+  getByView: async (view, pageSize, pageIndex, searchTerm = "", filters = {}) => {
     try {
       const params = new URLSearchParams({
         view,
         pageSize,
         pageIndex,
-        ...filters, // Spread filters to include additional query parameters if needed
+        searchTerm,
+        ...filters,
       });
-
+  
       const response = await axiosInstance.get(`${API_URL}/applications/getAll?${params.toString()}`);
       return { ...response.data, valid: true };
     } catch (error) {
       return {
         valid: false,
-        error: error.response?.data?.error || 'An unknown error occurred',
+        error: error.response?.data?.error || "An unknown error occurred",
       };
     }
   },
+  
 
-   getApplicationById : async (id) => {
+   getApplicationById : async (id, view) => {
 
       try {
         
-        const params = new URLSearchParams({guid: id});
+        const params = new URLSearchParams({guid: id, view : view});
         const response = await axiosInstance.get(`${API_URL}/applications/get?${params.toString()}`);
         return { ...response.data, valid: true };
 
@@ -97,7 +99,17 @@ const applicationService = {
       }
     },
 
-
+    getDomains: async () => {
+      try {
+        const response = await axiosInstance.get(`${API_URL}/applications/domains`);
+        return { valid: true, data: response.data };
+      } catch (error) {
+        return {
+          valid: false,
+          error: error.response?.data?.error || 'An unknown error occurred',
+        };
+      }
+    },
 
 } 
 

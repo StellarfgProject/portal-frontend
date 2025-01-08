@@ -1,14 +1,25 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const Filters = ({ domainsList = [], onSaveFilters }) => {
   const [filters, setFilters] = useState({
     applicationType: "all applications",
     status: "unclaimed",
     dateRange: { start: "", end: "" },
-    domains: [],
+    domains: [...domainsList],
   });
   const [previousState, setPreviousState] = useState(filters);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      domains: [...domainsList],
+    }));
+    setPreviousState((prev) => ({
+      ...prev,
+      domains: [...domainsList],
+    }));
+  }, [domainsList]);
 
 
   const handleToggleAllDomains = (selectAll) => {
@@ -138,9 +149,3 @@ const Filters = ({ domainsList = [], onSaveFilters }) => {
 };
 
 export default Filters;
-
-
-
-
-
-

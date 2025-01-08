@@ -2,18 +2,18 @@ import React from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate for navigation
 import "./ApplicationCard.css"; // Add your custom CSS styles
 
-const ApplicationCard = ({ application }) => {
+const ApplicationCard = ({ application, view }) => {
   const navigate = useNavigate();
 
   const handleViewClick = () => {
-    navigate(`/applications/view/${application.guid}`); // Navigate to the view route with the application's ID
+    navigate(`/applications/view/${application.guid}?view=${view}`); // Navigate to the view route with the application's ID
   };
 
   return (
     <tr className="application-card application-row">
       <td>
         <button className="btn btn-success btn-sm" onClick={handleViewClick}>
-          View 
+          View
         </button>
       </td>
       <td>
