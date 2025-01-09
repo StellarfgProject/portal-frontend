@@ -4,8 +4,10 @@
 
 .application-view .form-section {
   background-color: #fff;
-  padding: 10px 20px; /* Top/Bottom: 10px, Left/Right: 20px */
+  padding: 20px 20px; /* Top/Bottom: 10px, Left/Right: 20px */
   color: black;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
 }
 
 .application-view .section-title {
