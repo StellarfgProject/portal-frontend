@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import applicationService from "../../services/applicationService";
 import "./ApplicationView.css";
 import FormField from "./FormField";
@@ -18,11 +18,14 @@ const ApplicationView = ({ isAdmin = false }) => {
   
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [application, setApplication] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
+
+  const view = searchParams.get("view");
 
   const fetchStatuses = async () => {
     
@@ -40,25 +43,28 @@ const ApplicationView = ({ isAdmin = false }) => {
   };
 
   useEffect(() => {
+
     const fetchApplicationDetails = async () => {
       setLoading(true);
-
-      const data = await applicationService.getApplicationById(id);
-        
-      if (!data.valid) {
-        setError(error || "Failed to load applications.");
-        console.log("Failed to fetch application details:", error);
+      try {
+        const result = await applicationService.getApplicationById(id, view);
+        if (result.valid) {
+          
+          setApplication(result);
+        } else {
+          setError("Failed to load application details.");
+        }
+      } catch (err) {
+        setError("An unexpected error occurred.");
       }
-
-      setApplication(data);
       setLoading(false);
-
     };
+    
 
     fetchApplicationDetails();
     // setIsEditable(isAdmin);
     setIsEditable(false);
-    fetchStatuses();
+    if(view != 'incomplete')fetchStatuses();
   }, [id, isAdmin]);
 
   if (loading) {
@@ -131,6 +137,13 @@ const ApplicationView = ({ isAdmin = false }) => {
     link.click();
     document.body.removeChild(link);
   };
+
+  const handleUpdate = (field, value, index, type) => {
+    const updatedItems = [...application[type]]; // Clone the array (vehicles or loans)
+    updatedItems[index][field] = value; // Update the specific field
+    setApplication({ ...application, [type]: updatedItems }); // Update the application state
+  };
+  
   
   
   if (!application || !application.domain) {
@@ -158,20 +171,24 @@ const ApplicationView = ({ isAdmin = false }) => {
       </button>
 
       <div className="mb-4">
-      {application.claimed_by ? (
+      
+      {view !== "incomplete" && (
         <div>
-          <div className="d-flex">
-            <div className="ms-auto">
-              <button
-                className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent">Update Status</button>
-            </div>
-          </div>
+          {application.claimed_by ? (
+            <div>
+              <div className="d-flex">
+                <div className="ms-auto">
+                  <button className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent" >
+                    Update Status
+                  </button>
+                </div>
+              </div>
 
-          <div className="collapse" id="collapseContent">
-            <StatusForm guid={id} onUpdate={fetchStatuses} />
-          </div>
+              <div className="collapse" id="collapseContent">
+                <StatusForm guid={id} onUpdate={fetchStatuses} />
+              </div>
 
-            <StatusLogTable logs={logs} />
+              <StatusLogTable logs={logs} />
             </div>
           ) : (
             <div className="d-flex">
@@ -180,6 +197,9 @@ const ApplicationView = ({ isAdmin = false }) => {
               </div>
             </div>
           )}
+        </div>
+      )}
+
 
           {/* CSV Export Button */}
           <div className="mt-3 d-flex justify-content-end">
