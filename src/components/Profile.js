@@ -63,7 +63,7 @@ const Profile = ({ user }) => {
       {/* Profile Details */}
       <div className="profile-card">
         <div className="profile-image">
-          <img src={"logo.png"} alt="Profile" />
+          <img src={"person-img.png"} alt="Profile" />
         </div>
         <div className="profile-info">
           <h2>{`${user.firstName} ${user.lastName}`}</h2>
