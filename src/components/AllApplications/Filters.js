@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
 
-const Filters = ({ domainsList = [], onSaveFilters }) => {
+const Filters = ({ domainsList = [], onSaveFilters, view="unclaimed" }) => {
   const [filters, setFilters] = useState({
-    applicationType: "all applications",
-    status: "unclaimed",
+    applicationType: view,
     dateRange: { start: "", end: "" },
     domains: [...domainsList],
   });
   const [previousState, setPreviousState] = useState(filters);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      applicationType: view,
+    }));
+    setPreviousState((prev) => ({
+      ...prev,
+      applicationType: view,
+    }));
+
+  }, [view])
 
   useEffect(() => {
     setFilters((prev) => ({
