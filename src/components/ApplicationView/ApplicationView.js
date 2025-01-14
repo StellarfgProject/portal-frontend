@@ -19,13 +19,20 @@ const ApplicationView = ({ isAdmin = false }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [application, setApplication] = useState(null);
+  const [application, updateApplication] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
 
   const view = searchParams.get("view");
+
+  const setApplication = async (app) => {
+    // console.log(app);
+    updateApplication({...app});
+    // console.log(application)
+
+  };
 
   const fetchStatuses = async () => {
     
@@ -137,13 +144,6 @@ const ApplicationView = ({ isAdmin = false }) => {
     link.click();
     document.body.removeChild(link);
   };
-
-  const handleUpdate = (field, value, index, type) => {
-    const updatedItems = [...application[type]]; // Clone the array (vehicles or loans)
-    updatedItems[index][field] = value; // Update the specific field
-    setApplication({ ...application, [type]: updatedItems }); // Update the application state
-  };
-  
   
   
   if (!application || !application.domain) {
@@ -153,13 +153,13 @@ const ApplicationView = ({ isAdmin = false }) => {
   const renderDomainSpecificForm = () => {
     switch (application.domain) {
       case "autorefi.dcfcu.org":
-        return <DcfcuFormView application={application} onChange={setApplication} />;
+        return <DcfcuFormView application={application} onChange={setApplication} isAdmin={isAdmin}/>;
       case "homeequity.belco.org":
         return <HomeEquityFormView application={application} onChange={setApplication} />;
       case "apply.salrefi.com":
         return <SalrefiFormView application={application} onChange={setApplication} />;
       default:
-        return <FormView application={application} onChange={setApplication} />;
+        return <FormView application={application} setApplication={setApplication} isAdmin={isAdmin}/>;
     }
   };
     

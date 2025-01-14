@@ -35,23 +35,23 @@ const VehicleLoanSection = ({ vehicles, loans, isEditable, onUpdate }) => {
                 <h5 className="section-title">Current Loan</h5>
                 <div className="row">
                     <div className="col-md-6">
-                        <FormField name="Monthly Payment" value={loans[0].monthly_payment} iseditable={isEditable} onChange={(newValue) => onUpdate("monthly_payment", newValue, 0, "loans")} />
+                        <FormField name="Monthly Payment" value={loans[0].monthly_payment} iseditable={isEditable} onChange={(newValue) => onUpdate("monthly_payment", newValue, 0, "current_loans")} />
                     </div>
                     <div className="col-md-6">
-                        <FormField name="Remaining loan/payoff amount" value={loans[0].current_payoff} iseditable={isEditable} onChange={(newValue) => onUpdate("current_payoff", newValue, 0, "loans")} />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <FormField name="Remaining term" value={loans[0].remaining_term} iseditable={isEditable} onChange={(newValue) => onUpdate("remaining_term", newValue, 0, "loans")} />
-                    </div>
-                    <div className="col-md-6">
-                        <FormField name="Lien holder" value={loans[0].lien_holder} iseditable={isEditable} onChange={(newValue) => onUpdate("lien_holder", newValue, 0, "loans")} />
+                        <FormField name="Remaining loan/payoff amount" value={loans[0].current_payoff} iseditable={isEditable} onChange={(newValue) => onUpdate("current_payoff", newValue, 0, "current_loans")} />
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-md-6">
-                        <FormField name="Next Payment Date" value={loans[0].next_payment_date} iseditable={isEditable} onChange={(newValue) => onUpdate("next_payment_date", newValue, 0, "loans")}  />
+                        <FormField name="Remaining term" value={loans[0].remaining_term} iseditable={isEditable} onChange={(newValue) => onUpdate("remaining_term", newValue, 0, "current_loans")} />
+                    </div>
+                    <div className="col-md-6">
+                        <FormField name="Lien holder" value={loans[0].lien_holder} iseditable={isEditable} onChange={(newValue) => onUpdate("lien_holder", newValue, 0, "current_loans")} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-6">
+                        <FormField name="Next Payment Date" value={loans[0].next_payment_date} iseditable={isEditable} onChange={(newValue) => onUpdate("next_payment_date", newValue, 0, "current_loans")}  />
                     </div>
                 </div>
             </div>
@@ -91,23 +91,23 @@ const VehicleLoanSection = ({ vehicles, loans, isEditable, onUpdate }) => {
                 <h5 className="section-title">Current Loan {index + 1}</h5>
                 <div className="row">
                     <div className="col-md-6">
-                        <FormField name="Monthly Payment" value={loans[index]?.monthly_payment} iseditable={isEditable} onChange={(newValue) => onUpdate("monthly_payment", newValue, index, "loans")} />
+                        <FormField name="Monthly Payment" value={loans[index]?.monthly_payment} iseditable={isEditable} onChange={(newValue) => onUpdate("monthly_payment", newValue, index, "current_loans")} />
                     </div>
                     <div className="col-md-6">
-                        <FormField name="Remaining loan/payoff amount" value={loans[index]?.current_payoff} iseditable={isEditable} onChange={(newValue) => onUpdate("current_payoff", newValue, index, "loans")} />
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col-md-6">
-                        <FormField name="Remaining term" value={loans[index]?.remaining_term} iseditable={isEditable} onChange={(newValue) => onUpdate("remaining_term", newValue, index, "loans")} />
-                    </div>
-                    <div className="col-md-6">
-                        <FormField name="Lien holder" value={loans[index]?.lien_holder} iseditable={isEditable} onChange={(newValue) => onUpdate("lien_holder", newValue, index, "loans")} />
+                        <FormField name="Remaining loan/payoff amount" value={loans[index]?.current_payoff} iseditable={isEditable} onChange={(newValue) => onUpdate("current_payoff", newValue, index, "current_loans")} />
                     </div>
                 </div>
                 <div className="row">
                     <div className="col-md-6">
-                        <FormField name="Next Payment Date" value={loans[index]?.next_payment_date} iseditable={isEditable} onChange={(newValue) => onUpdate("next_payment_date", newValue, index, "loans")} />
+                        <FormField name="Remaining term" value={loans[index]?.remaining_term} iseditable={isEditable} onChange={(newValue) => onUpdate("remaining_term", newValue, index, "current_loans")} />
+                    </div>
+                    <div className="col-md-6">
+                        <FormField name="Lien holder" value={loans[index]?.lien_holder} iseditable={isEditable} onChange={(newValue) => onUpdate("lien_holder", newValue, index, "current_loans")} />
+                    </div>
+                </div>
+                <div className="row">
+                    <div className="col-md-6">
+                        <FormField name="Next Payment Date" value={loans[index]?.next_payment_date} iseditable={isEditable} onChange={(newValue) => onUpdate("next_payment_date", newValue, index, "current_loans")} />
                     </div>
                 </div>
             </div>

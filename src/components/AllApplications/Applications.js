@@ -18,7 +18,6 @@ const Applications = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
     applicationType: "all",
-    status: "",
     dateRange: { start: "", end: "" },
     domains: domains,
   });
@@ -167,7 +166,7 @@ const Applications = () => {
 
           <div className="row mb-3">
             <div className="col-md-8">
-              <Filters domainsList={domains} onSaveFilters={handleApplyFilters} />
+              <Filters domainsList={domains} onSaveFilters={handleApplyFilters} view = {currentView} />
             </div>
             <div className="col-md-4">
               <div className="input-group">
