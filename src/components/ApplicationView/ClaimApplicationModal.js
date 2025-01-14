@@ -48,55 +48,69 @@ const ClaimApplicationModal = ({ guid, onClaimSuccess }) => {
 
       {/* Modal */}
       {show && (
-        <div
-          className="modal fade show"
-          style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
-          tabIndex="-1"
-          role="dialog"
-        >
-          <div className="modal-dialog modal-dialog-centered" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title text-success">Confirm Claim</h5>
-                <button type="button" className="close" aria-label="Close" onClick={handleClose} >
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <p className="text-muted">
-                  Are you sure you want to claim this application? Once claimed,
-                  it will be assigned to you.
-                </p>
-                {error && <div className="alert alert-danger">{error}</div>}
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={handleClose}
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-success"
-                  onClick={handleClaim}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="spinner-border spinner-border-sm" role="status">
-                      <span className="sr-only">Loading...</span>
-                    </div>
-                  ) : (
-                    "Confirm"
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
+  <div
+    className="modal fade show"
+    style={{ display: "block", backgroundColor: "rgba(0, 0, 0, 0.5)" }}
+    tabIndex="-1"
+    role="dialog"
+  >
+    <div className="modal-dialog modal-dialog-centered" role="document">
+      <div className="modal-content">
+        <div className="modal-header bg-success ">
+          <h5 className="modal-title text-white">Confirm Claim</h5>
+          <button
+            type="button"
+            className="btn-close"
+            aria-label="Close"
+            onClick={handleClose}
+          ></button>
         </div>
-      )}
+        <div className="modal-body">
+          <p className="text-muted">
+            Are you sure you want to claim this application? Once claimed, it will be assigned to you.
+          </p>
+          {error && (
+            <div
+              className="alert alert-danger d-flex align-items-center"
+              role="alert"
+            >
+              <i className="bi bi-exclamation-triangle-fill me-2"></i>
+              {error}
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleClose}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={handleClaim}
+            disabled={loading}
+          >
+            {loading ? (
+              <div
+                className="spinner-border spinner-border-sm text-light"
+                role="status"
+              >
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            ) : (
+              "Confirm"
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
     </>
   );
 };

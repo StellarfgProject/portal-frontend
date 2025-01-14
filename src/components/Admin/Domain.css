@@ -1,0 +1,16 @@
+/* Domain.css */
+.domain-page .form-group label {
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .domain-details-card {
+    border-radius: 15px;
+    padding: 20px;
+  }
+  
+  .domain-page h3 {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  

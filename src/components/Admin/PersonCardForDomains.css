@@ -1,0 +1,42 @@
+/* PersonCardForDomains.css */
+.person-card {
+    border-radius: 15px;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .person-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .person-card .card-body {
+    padding: 15px;
+  }
+  
+  .person-card h5 {
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin-bottom: 5px;
+  }
+  
+  .person-card .text-muted {
+    font-size: 0.9rem;
+  }
+  
+  .person-card .btn {
+    border-radius: 5px;
+    font-size: 0.85rem;
+    padding: 5px 10px;
+  }
+  
+  .person-card .btn-outline-danger {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+  
+  .person-card .btn-outline-danger:hover {
+    background-color: #dc3545;
+    color: #fff;
+  }
+  

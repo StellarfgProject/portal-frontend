@@ -1,0 +1,40 @@
+/* Person.css */
+.person-page {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .person-details-card {
+    border-radius: 15px;
+    border: none;
+    padding: 20px;
+  }
+  
+  .person-details-card h5 {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  
+  .options .form-check {
+    margin-bottom: 10px;
+  }
+  
+  .options .form-check-label {
+    font-size: 1rem;
+  }
+  
+  .domains h4 {
+    margin-bottom: 20px;
+  }
+  
+  .domain-card {
+    border-radius: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: none;
+  }
+  
+  .domain-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  }
+  

@@ -1,0 +1,21 @@
+/* DomainCard.css */
+.domain-card {
+    border-radius: 15px;
+    border: none;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .domain-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  }
+  
+  .domain-card .card-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+  }
+  
+  .domain-card .text-muted {
+    font-size: 0.9rem;
+  }
+  

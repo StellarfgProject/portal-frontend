@@ -8,6 +8,7 @@ import CSVService from "../../services/csvService";
 import "./Applications.css";
 import Application from "../../models/Application";
 import Domains from '../../assets/data/domains.json';
+import applicationFields from "../../assets/data/applicationFields";
 
 const Applications = () => {
   const [applications, setApplications] = useState([]);
@@ -20,6 +21,7 @@ const Applications = () => {
   const [loading, setLoading] = useState(false);
   const authToken = localStorage.getItem("authToken"); // Or use a context/store
   const userEmail = localStorage.getItem("userEmail"); // Or use a context/store
+  const [filters, setFilters] = useState({}); // Add this line to define filters state
 
 
 
@@ -79,7 +81,8 @@ const Applications = () => {
     await fetchApplications(currentView, page);
   };
 
-  const handleApplyFilters = async (filters) => {
+  const handleApplyFilters = async (newFilters) => {
+    setFilters(newFilters); // Save filters to state
     setError(null); // Reset error state
     try {
       const { applications, pagination, valid, error } = await applicationService.getByView(
@@ -136,34 +139,61 @@ const Applications = () => {
     }
   };
    
-  const handleExportCSV = () => {
-    const headers = [
-      "First Name",
-      "Last Name",
-      "City",
-      "State",
-      "Email",
-      "Submitted At",
-      "Domain",
-      "Status",
-    ];
-    const data = applications.map((app) => ({
-      "First Name": app.first_name,
-      "Last Name": app.last_name,
-      City: app.city,
-      State: app.state,
-      Email: app.email,
-      "Submitted At": app.ts_formatted,
-      Domain: app.domain,
-      Status: app.status,
-    }));
+  const handleExportCSV = async () => {
+    try {
+      const { applications, valid, error } = await applicationService.getByView(
+        currentView,
+        1000, 
+        0
+      );
+  
+      if (!valid) {
+        setError(error);
+        return;
+      }
+  
+      // const headers = [
+      //   "First Name",
+      //   "Last Name",
+      //   "City",
+      //   "State",
+      //   "Email",
+      //   "Submitted At",
+      //   "Domain",
+      //   "Status",
+      //   "ZIP"
+      // ];
+  
+      // const data = applications.map((app) => ({
+      //   "First Name": app.first_name,
+      //   "Last Name": app.last_name,
+      //   City: app.city,
+      //   State: app.state,
+      //   Email: app.email,
+      //   "Submitted At": app.ts_formatted,
+      //   Domain: app.domain,
+      //   Status: app.status,
+      //   ZIP: app.zip
+      // }));
+  
+      const headers = applicationFields.map((field) => field.label);
+      const data = applications.map((app) =>
+        applicationFields.reduce((row, field) => {
+          row[field.label] = app[field.key] || 'null'; 
+          return row;
+        }, {})
+      );
 
-    CSVService.generateCSV(headers, data, "applications.csv");
+      CSVService.generateCSV(headers, data, `${currentView}_applications.csv`);
+    } catch (error) {
+      console.error(error);
+      setError('Failed to export applications.');
+    }
   };
-
+  
   return (
     <div className="applications-container mt-4">
-
+      {loading && <div className="spinner-border" role="status"><span className="sr-only">Loading...</span></div>}
       {error ? ( 
         <div className="alert alert-danger" role="alert">
           {error} 
