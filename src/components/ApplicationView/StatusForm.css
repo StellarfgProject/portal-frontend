@@ -1,50 +1,45 @@
-/* General Container */
 .status-form {
     margin: 20px;
     padding: 20px;
-    background-color: #ffffff; /* Clean white background */
-    border: 1px solid #e6e6e6; /* Light gray border */
-    border-radius: 10px; /* Smooth corners */
-    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow for elevation */
-    font-family: 'Arial', sans-serif; /* Professional font */
+    background-color: #ffffff; 
+    border: 1px solid #e6e6e6; 
+    border-radius: 10px; 
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); 
+    font-family: 'Arial', sans-serif;
   }
   
-  /* Form Group */
   .status-form .form-group {
     margin-bottom: 20px;
   }
   
-  /* Labels */
   .status-form .form-label {
     font-weight: 600;
-    color: #333333; /* Dark gray for readability */
+    color: #333333; 
     display: inline-block;
     margin-bottom: 8px;
     font-size: 14px;
   }
   
-  /* Select Input */
   .status-form select.form-control {
     display: block;
     width: 100%;
     padding: 12px;
     font-size: 14px;
     line-height: 1.5;
-    color: #495057; /* Professional gray text */
+    color: #495057; 
     background-color: #fff;
     background-clip: padding-box;
     border: 1px solid #ced4da;
     border-radius: 6px;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075); /* Subtle inner shadow */
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075); 
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   }
   
   .status-form select.form-control:focus {
-    border-color: #007bff; /* Professional blue on focus */
+    border-color: #007bff;
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
   }
   
-  /* Textarea */
   .status-form textarea.form-control {
     width: 100%;
     padding: 12px;
@@ -63,7 +58,6 @@
     box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
   }
   
-  /* Button */
   .status-form .btn {
     display: block;
     width: 100%;
@@ -80,16 +74,15 @@
   }
   
   .status-form .btn:hover {
-    background-color: #0056b3; /* Darker blue on hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+    background-color: #0056b3; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
   }
   
   .status-form .btn:active {
-    background-color: #004085; /* Even darker blue on click */
+    background-color: #004085; 
     box-shadow: none;
   }
   
-  /* Responsive Design */
   @media (max-width: 768px) {
     .status-form {
       padding: 15px;
@@ -101,7 +94,6 @@
     }
   }
   
-  /* Accessibility Enhancements */
   .status-form select.form-control:disabled,
   .status-form textarea.form-control:disabled {
     background-color: #e9ecef;
@@ -110,7 +102,7 @@
   
   .status-form .form-label.required::after {
     content: " *";
-    color: #dc3545; /* Red for required fields */
+    color: #dc3545;
     margin-left: 4px;
   }
   

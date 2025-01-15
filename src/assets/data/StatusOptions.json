@@ -10,25 +10,13 @@
       "Other": "Other"
     },
     "Decisioned - Denied by FI": {
-      "Charge-off/bankruptcy": "Charge-off/bankruptcy",
-      "Collections": "Collections",
-      "Delinquencies": "Delinquencies",
-      "DTI": "DTI",
-      "LTV": "LTV",
       "Insufficient credit history": "Insufficient credit history",
       "Insufficient employment history": "Insufficient employment history",
       "Other": "Other"
     },
     "Not Decisioned": {
       "Applicant withdrew": "Applicant withdrew",
-      "Incomplete / Missing address info": "Incomplete / Missing address info",
-      "Incomplete / Missing consent to pull credit": "Incomplete / Missing consent to pull credit",
-      "Incomplete / Missing contact info": "Incomplete / Missing contact info",
-      "Incomplete / Missing employment info": "Incomplete / Missing employment info",
-      "Incomplete / Missing SSN": "Incomplete / Missing SSN",
-      "Incomplete / Missing vehicle info/VIN": "Incomplete / Missing vehicle info/VIN",
-      "Incomplete / Other": "Incomplete / Other",
-      "No application found": "No application found",
+      "Incomplete / Missing fields": "Incomplete / Missing Fields",
       "Unable to contact applicant": "Unable to contact applicant",
       "Other": "Other"
     }

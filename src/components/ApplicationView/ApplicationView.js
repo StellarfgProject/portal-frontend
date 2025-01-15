@@ -12,84 +12,80 @@ import HomeEquityFormView from "./Forms/HomeEquityFormView";
 import SalrefiFormView from "./Forms/SalrefiFormView";
 import DcfcuFormView from "./Forms/DcfcuFormView";
 import FormView from "./Forms/FormView";
+import TicketForm from "./TicketForm";
+import TicketLogTable from "./TicketLogTable";
 
 const ApplicationView = ({ isAdmin = false }) => {
-  
-  
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [application, setApplication] = useState(null);
   const [isEditable, setIsEditable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [logs, setLogs] = useState([]);
-
+  const [isTicketFormVisible, setTicketFormVisible] = useState(false);
+  const [ticketLogs, setTicketLogs] = useState([]); 
+  // Fetch application statuses
   const fetchStatuses = async () => {
-    
-    setError("");
     try {
+      setError(null);
       const result = await applicationService.getStatuses(id);
       if (result.valid) {
-        setLogs(result.data); // Update logs state with data
+        setLogs(result.data);
       } else {
         alert(result.error || "Failed to fetch statuses.");
       }
     } catch (err) {
       alert("An unexpected error occurred while fetching statuses.");
-    } 
+    }
   };
 
+  // Fetch application details on component load
   useEffect(() => {
     const fetchApplicationDetails = async () => {
-      setLoading(true);
-
-      const data = await applicationService.getApplicationById(id);
-        
-      if (!data.valid) {
-        setError(error || "Failed to load applications.");
-        console.log("Failed to fetch application details:", error);
+      try {
+        setLoading(true);
+        const data = await applicationService.getApplicationById(id);
+        if (data.valid) {
+          setApplication(data);
+        } else {
+          setError(data.error || "Failed to load applications.");
+        }
+      } catch (err) {
+        setError("An unexpected error occurred while loading the application.");
+      } finally {
+        setLoading(false);
       }
-
-      setApplication(data);
-      setLoading(false);
-
     };
 
     fetchApplicationDetails();
-    // setIsEditable(isAdmin);
     setIsEditable(false);
     fetchStatuses();
-  }, [id, isAdmin]);
+    fetchTicketLogs();
+  }, [id]);
 
-  if (loading) {
-    return (
-      <div className="text-center mt-5">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Loading...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mt-4">
-        <div className="alert alert-danger" role="alert"> {error} </div>
-      </div>
-    );
-  }
-
-  const handleClaimSuccess = () => {
-    setApplication({ ...application, claimed_by: true });
+  const fetchTicketLogs = async () => {
+    try {
+      const result = await applicationService.getTicketLogs(id);
+      if (result && result.valid && Array.isArray(result.data)) {
+        setTicketLogs(result.data);
+      } else {
+        alert(result.error || "Invalid response format.");
+      }
+    } catch (err) {
+      console.error("Error fetching ticket logs:", err);
+      alert("An error occurred while fetching ticket logs.");
+    }
   };
-
+  
+  
   const handleDownloadCSV = () => {
     if (!application) {
       alert("No application data available for download.");
       return;
     }
-  
-    // Function to flatten nested objects
+
     const flattenObject = (obj, parentKey = "", result = {}) => {
       for (const key in obj) {
         if (Object.hasOwnProperty.call(obj, key)) {
@@ -97,45 +93,50 @@ const ApplicationView = ({ isAdmin = false }) => {
           if (typeof obj[key] === "object" && obj[key] !== null) {
             flattenObject(obj[key], newKey, result);
           } else {
-            // Assign value or null if undefined
             result[newKey] = obj[key] !== undefined ? obj[key] : null;
           }
         }
       }
       return result;
     };
-  
-    // Flatten the application object to handle nested structures
+
     const flattenedApplication = flattenObject(application);
-  
-    // Prepare headers and values
     const headers = Object.keys(flattenedApplication);
-    const values = Object.values(flattenedApplication).map(value =>
+    const values = Object.values(flattenedApplication).map((value) =>
       value !== null ? value : "null"
-    ); // Represent null values explicitly as "null"
-  
-    // Create CSV content
+    );
+
     const csvData = [headers, values];
     const csvContent =
       "data:text/csv;charset=utf-8," +
       csvData.map((row) => row.map((val) => `"${val}"`).join(",")).join("\n");
-  
-    // Create a downloadable link
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
     link.setAttribute("download", "application_data.csv");
-  
-    // Trigger download
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
-  
-  
-  if (!application || !application.domain) {
-    return <div>Loading or no application domain found...</div>;
-  }
+
+  const handleHelpRequestSubmit = async (ticketData) => {
+    try {
+      const result = await applicationService.insertTicketLog(id, ticketData); // Update with your API endpoint
+      console.log("API Response:", result); // Debug: Log the API response
+      if (result.valid) {
+        setTicketLogs((prevLogs) => [result.data, ...prevLogs]); // Prepend the new ticket to the logs
+        setTicketFormVisible(false); // Hide the ticket form
+        alert("Ticket submitted successfully!");
+      } else {
+        console.error("API Error:", result.error); // Debug: Log the error
+        alert(result.error || "Failed to submit the ticket.");
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err); // Debug: Log unexpected errors
+      alert("An error occurred while submitting the ticket.");
+    }
+  };
   
   const renderDomainSpecificForm = () => {
     switch (application.domain) {
@@ -149,43 +150,71 @@ const ApplicationView = ({ isAdmin = false }) => {
         return <FormView application={application} onChange={setApplication} />;
     }
   };
-    
+
+  if (loading) {
+            return (
+              <div className="text-center mt-5">
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+    );
+  }
+
+  if (error) {
     return (
+      <div className="container mt-4">
+        <div className="alert alert-danger" role="alert">
+          {error}
+        </div>
+      </div>
+    );
+  }
+
+  return (
     <div className="container application-view">
-      
-      <button className="btn btn-outline-secondary mb-4" onClick={() => navigate("/applications")}>
+      <button
+        className="btn btn-outline-secondary mb-4"
+        onClick={() => navigate("/applications")}
+      >
         <i className="bi bi-arrow-left"></i> Back to Applications
       </button>
 
       <div className="mb-4">
-      {application.claimed_by ? (
-        <div>
-          <div className="d-flex">
-            <div className="ms-auto">
-              <button
-                className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent">Update Status</button>
+        {application.claimed_by ? (
+          <div>
+            <div className="d-flex justify-content-end gap-2">
+              <button className="btn btn-warning" type="button" data-bs-toggle="collapse" data-bs-target="#collapseContent" aria-expanded="false" aria-controls="collapseContent"> Update Status</button>
+              <button className="btn btn-danger" onClick={() => setTicketFormVisible(!isTicketFormVisible)}>Help</button>
             </div>
-          </div>
 
-          <div className="collapse" id="collapseContent">
-            <StatusForm guid={id} onUpdate={fetchStatuses} />
-          </div>
+            <div className="collapse" id="collapseContent">
+              <StatusForm guid={id} onUpdate={fetchStatuses} />
+            </div>
 
             <StatusLogTable logs={logs} />
-            </div>
-          ) : (
-            <div className="d-flex">
-              <div className="ms-auto">
-                <ClaimApplicationModal guid={application.guid} onClaimSuccess={handleClaimSuccess} />
-              </div>
-            </div>
-          )}
-
-          {/* CSV Export Button */}
-          <div className="mt-3 d-flex justify-content-end">
-            <button className="btn btn-success"  onClick={handleDownloadCSV}> <i className="bi bi-download"></i></button>
           </div>
+        ) : (
+          <div className="d-flex justify-content-end">
+            <ClaimApplicationModal guid={application.guid} onClaimSuccess={() => setApplication({ ...application, claimed_by: true })}
+            />
+          </div>
+        )}
+
+        {isTicketFormVisible && (
+          <div className="mt-3">
+            <TicketForm guid={id} onSubmit={handleHelpRequestSubmit} onClose={() => setTicketFormVisible(false)}/>
+          </div>
+        )}
+        <TicketLogTable logs={ticketLogs} />
+        
+        <div className="mt-3 d-flex justify-content-end">
+          <button className="btn btn-success" onClick={handleDownloadCSV}>
+            <i className="bi bi-download"></i>
+          </button>
         </div>
+      </div>
+
 
       <div>
         <div className="form-section mb-4"> 
