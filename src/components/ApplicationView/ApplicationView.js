@@ -13,7 +13,7 @@ import SalrefiFormView from "./Forms/SalrefiFormView";
 import DcfcuFormView from "./Forms/DcfcuFormView";
 import FormView from "./Forms/FormView";
 import TicketForm from "./TicketForm";
-import TicketLogTable from "./TicketLogTable";
+
 
 const ApplicationView = ({ isAdmin = false }) => {
   const { id } = useParams();
@@ -206,7 +206,7 @@ const ApplicationView = ({ isAdmin = false }) => {
             <TicketForm guid={id} onSubmit={handleHelpRequestSubmit} onClose={() => setTicketFormVisible(false)}/>
           </div>
         )}
-        <TicketLogTable logs={ticketLogs} />
+        {/* <TicketLogTable logs={ticketLogs} /> */}
         
         <div className="mt-3 d-flex justify-content-end">
           <button className="btn btn-success" onClick={handleDownloadCSV}>
